@@ -26,59 +26,10 @@ import com.example.corpalivapp.ui.theme.CorpalivAppTheme
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         setContent {
-            CorpalivAppTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    inicioScreen(
-                        modifier = Modifier.padding(innerPadding)
-                    )
-                }
+            CorpalivAppTheme() {
+                HomeScreen() // Llamada limpia a la vista
             }
         }
-    }
-}
-
-@Composable
-fun inicioScreen(modifier: Modifier = Modifier){
-    var mostrarMensaje by remember { mutableStateOf(false) }
-    Column(modifier = modifier.fillMaxSize().padding(24.dp), verticalArrangement = Arrangement.spacedBy(26.dp)) {
-        Text(
-            text = "Corpaliv APP",
-            style = MaterialTheme.typography.headlineLarge
-        )
-        Text(
-            text = "Conoce nuestra mision y como colaborar con nosotros!!",
-            style = MaterialTheme.typography.bodyLarge
-        )
-        Text(
-            text = "Nuestra mision",
-            style = MaterialTheme.typography.headlineSmall
-        )
-        Text(
-            text = "Aqui va la mision",
-            style = MaterialTheme.typography.bodyLarge
-        )
-
-        //Boton
-        Button(onClick = {mostrarMensaje = true}, modifier = modifier.fillMaxWidth()) {
-            Text(
-                text = "Quiero Colaborar"
-            )
-        }
-        if (mostrarMensaje) {
-            Text(
-                text = "¡Gracias por tu ayuda!",
-                style = MaterialTheme.typography.bodyLarge
-            )
-        }
-    }
-}
-
-@Preview(showBackground = true)
-@Composable
-fun inicioPreview() {
-    CorpalivAppTheme {
-        inicioScreen()
     }
 }

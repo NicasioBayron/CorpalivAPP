@@ -21,6 +21,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.example.corpalivapp.ui.App
 import com.example.corpalivapp.ui.theme.CorpalivAppTheme
 
 class MainActivity : ComponentActivity() {
@@ -28,7 +29,8 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             CorpalivAppTheme() {
-                HomeScreen() // Llamada limpia a la vista
+                //Me Falta aportes y ajustes
+                App() // Llamada limpia a la vista
             }
         }
     }

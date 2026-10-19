@@ -29,6 +29,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             CorpalivAppTheme() {
+                //Texto de prueba
                 //Me Falta aportes y ajustes
                 App() // Llamada limpia a la vista
             }

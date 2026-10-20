@@ -34,10 +34,15 @@ import java.util.Locale
 fun LoginScreen(
     modifier: Modifier = Modifier,
     loginViewModel: LoginViewModel = viewModel(),
-    onMenuClick: () -> Unit = {}
+    onMenuClick: () -> Unit = {},
+    onLoginExitoso: (Int) -> Unit = {}
 ) {
     val estado by loginViewModel.uiState.collectAsStateWithLifecycle()
-
+    LaunchedEffect(estado.autenticado, estado.usuarioId) {
+        if (estado.autenticado && estado.usuarioId != null) {
+            onLoginExitoso(estado.usuarioId!!)
+        }
+    }
     var mostrarRegistro by remember { mutableStateOf(false) }
 
     val verde = Color(0xFF286657)

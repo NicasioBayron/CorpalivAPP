@@ -6,5 +6,7 @@ data  class LoginUiState(
     val errorCorreo: String? = null,
     val errorClave: String? = null,
     val cargando: Boolean = false,
-    val mensaje: String? = null
+    val mensaje: String? = null,
+    val usuarioId: Int? = null,
+    val autenticado: Boolean = false
 )

@@ -4,23 +4,60 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
+import com.example.corpalivapp.data.DatabaseProvider
+import com.example.corpalivapp.data.Usuario
+
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+
 @Composable
 fun UsuarioScreen(
+    usuarioId: Int,
     modifier: Modifier = Modifier,
     onMenuClick: () -> Unit = {},
-    onInicioClick: () -> Unit = {}
+    onInicioClick: () -> Unit = {},
+    onCerrarSesion: () -> Unit = {}
 ) {
-
     val verde = Color(0xFF286657)
     val fondo = Color(0xFFFAF8F5)
+
+    val context = LocalContext.current
+
+    var usuario by remember(usuarioId) {
+        mutableStateOf<Usuario?>(null)
+    }
+
+    var cargando by remember(usuarioId) {
+        mutableStateOf(true)
+    }
+
+    // Buscar los datos del usuario en Room
+    LaunchedEffect(usuarioId) {
+        cargando = true
+
+        usuario = try {
+            withContext(Dispatchers.IO) {
+                val dao = DatabaseProvider
+                    .obtenerDatabase(context)
+                    .usuarioDao()
+
+                dao.buscarPorId(usuarioId)
+            }
+        } catch (e: Exception) {
+            null
+        }
+
+        cargando = false
+    }
 
     Column(
         modifier = modifier
@@ -28,7 +65,7 @@ fun UsuarioScreen(
             .background(fondo)
     ) {
 
-        // ENCABEZADO
+        // Encabezado
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -37,7 +74,6 @@ fun UsuarioScreen(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-
             Text(
                 text = "Mi perfil",
                 color = Color.White,
@@ -54,12 +90,11 @@ fun UsuarioScreen(
             }
         }
 
-        // CONTENIDO
+        // Contenido
         Column(
             modifier = Modifier.padding(24.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-
             Text(
                 text = "Mi perfil",
                 fontSize = 26.sp,
@@ -69,36 +104,40 @@ fun UsuarioScreen(
 
             Text("Información de tu cuenta")
 
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(
-                    containerColor = Color(0xFFE8EFE9)
-                ),
-                shape = RoundedCornerShape(16.dp)
-            ) {
-
-                Column(
-                    modifier = Modifier.padding(20.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+            if (cargando) {
+                CircularProgressIndicator(color = verde)
+            } else if (usuario == null) {
+                Text("No se pudo cargar la información del usuario")
+            } else {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = Color(0xFFE8EFE9)
+                    ),
+                    shape = RoundedCornerShape(16.dp)
                 ) {
+                    Column(
+                        modifier = Modifier.padding(20.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                    ) {
+                        Text(
+                            text = "Nombre",
+                            fontWeight = FontWeight.Bold,
+                            color = verde
+                        )
 
-                    Text(
-                        text = "Nombre",
-                        fontWeight = FontWeight.Bold,
-                        color = verde
-                    )
+                        Text(usuario!!.nombre)
 
-                    Text("Sin información disponible")
+                        HorizontalDivider()
 
-                    HorizontalDivider()
+                        Text(
+                            text = "Correo electrónico",
+                            fontWeight = FontWeight.Bold,
+                            color = verde
+                        )
 
-                    Text(
-                        text = "Correo electrónico",
-                        fontWeight = FontWeight.Bold,
-                        color = verde
-                    )
-
-                    Text("Sin información disponible")
+                        Text(usuario!!.correo)
+                    }
                 }
             }
 
@@ -110,6 +149,13 @@ fun UsuarioScreen(
                 )
             ) {
                 Text("Volver al inicio")
+            }
+
+            OutlinedButton(
+                onClick = onCerrarSesion,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Cerrar sesión", color = verde)
             }
         }
     }

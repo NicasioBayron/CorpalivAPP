@@ -8,7 +8,10 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.runtime.LaunchedEffect
+import androidx.lifecycle.viewmodel.compose.viewModel
 
+import com.example.corpalivapp.viewmodel.LoginViewModel
 import com.example.corpalivapp.HomeScreen
 import com.example.corpalivapp.ui.components.OpcionesDeslizante
 import com.example.corpalivapp.ui.screens.AjustesScreen
@@ -20,9 +23,14 @@ import com.example.corpalivapp.ui.screens.UsuarioScreen
 
 @Composable
 fun App() {
+    val loginViewModel: LoginViewModel = viewModel()
 
     var pantallaActual by rememberSaveable {
         mutableStateOf("Inicio")
+    }
+
+    var usuarioId by rememberSaveable {
+        mutableStateOf<Int?>(null)
     }
 
     OpcionesDeslizante(
@@ -38,6 +46,7 @@ fun App() {
 
             when (pantallaActual) {
 
+
                 "Inicio" -> HomeScreen(
                     modifier = Modifier.fillMaxSize(),
                     onMenuClick = abrirMenu,
@@ -46,17 +55,36 @@ fun App() {
                     }
                 )
 
-                "Usuario" -> UsuarioScreen(
-                    modifier = Modifier.fillMaxSize(),
-                    onMenuClick = abrirMenu,
-                    onInicioClick = {
-                        pantallaActual = "Inicio"
+                "Usuario" -> {
+                    if (usuarioId != null) {
+                        UsuarioScreen(
+                            usuarioId = usuarioId!!,
+                            modifier = Modifier.fillMaxSize(),
+                            onMenuClick = abrirMenu,
+                            onInicioClick = {
+                                pantallaActual = "Inicio"
+                            },
+                            onCerrarSesion = {
+                                loginViewModel.cerrarSesion()
+                                usuarioId = null
+                                pantallaActual = "Iniciar sesión"
+                            }
+                        )
+                    } else {
+                        LaunchedEffect(Unit) {
+                            pantallaActual = "Iniciar sesión"
+                        }
                     }
-                )
+                }
 
                 "Iniciar sesión" -> LoginScreen(
                     modifier = Modifier.fillMaxSize(),
-                    onMenuClick = abrirMenu
+                    loginViewModel = loginViewModel,
+                    onMenuClick = abrirMenu,
+                    onLoginExitoso = { id ->
+                        usuarioId = id
+                        pantallaActual = "Usuario"
+                    }
                 )
 
                 "Ajustes" -> AjustesScreen(

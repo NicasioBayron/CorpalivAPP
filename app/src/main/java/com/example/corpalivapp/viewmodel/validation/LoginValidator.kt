@@ -14,9 +14,21 @@ object LoginValidator{
     }
     fun validarClave(clave: String): String? {
         return when {
-            clave.isBlank() -> "Ingresa tu contraseña"
-            //Falta validar q tenga numeros, mayuscula y algun simbolo
-            clave.length < 8 -> "La contraseña debe tener al menos 8 caracteres"
+            clave.isBlank() ->
+                "Ingresa tu contraseña"
+
+            clave.length < 8 ->
+                "La contraseña debe tener al menos 8 caracteres"
+
+            !clave.any { it.isUpperCase() } ->
+                "Debe contener una letra mayúscula"
+
+            !clave.any { it.isDigit() } ->
+                "Debe contener al menos un número"
+
+            clave.all { it.isLetterOrDigit() } ->
+                "Debe contener al menos un símbolo"
+
             else -> null
         }
     }

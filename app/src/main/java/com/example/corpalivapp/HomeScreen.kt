@@ -35,7 +35,11 @@ import com.example.corpalivapp.ui.components.ProgramaCard
 import com.example.corpalivapp.ui.theme.CorpalivAppTheme
 
 @Composable
-fun HomeScreen(modifier: Modifier = Modifier) {
+fun HomeScreen(
+    modifier: Modifier = Modifier,
+    onMenuClick: () -> Unit = {},
+    onColaborarClick: () -> Unit = {}
+) {
 
     var mostrarMensaje by remember { mutableStateOf(false) }
 
@@ -73,9 +77,8 @@ fun HomeScreen(modifier: Modifier = Modifier) {
                 )
 
                 IconButton(
-                    onClick = {
+                    onClick = onMenuClick
                         // Aquí agregaremos el menú
-                    }
                 ) {
                     Text(
                         text = "☰",
@@ -139,9 +142,7 @@ fun HomeScreen(modifier: Modifier = Modifier) {
             )
 
             Button(
-                onClick = {
-                    mostrarMensaje = true
-                },
+                onClick = onColaborarClick,
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = verdeCorpaliv,
@@ -150,13 +151,6 @@ fun HomeScreen(modifier: Modifier = Modifier) {
                 shape = RoundedCornerShape(12.dp)
             ) {
                 Text(text = "Quiero Colaborar")
-            }
-
-            if (mostrarMensaje) {
-                Text(
-                    text = "¡Gracias por Colaborar!",
-                    style = MaterialTheme.typography.bodyLarge
-                )
             }
         }
     }

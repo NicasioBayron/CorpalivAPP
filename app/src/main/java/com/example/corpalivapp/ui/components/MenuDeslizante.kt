@@ -7,24 +7,36 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun MenuDeslizante(
     onMenuClick: () -> Unit
 ) {
-    TopAppBar(colors = TopAppBarDefaults.topAppBarColors(
-        containerColor = Color.Green
-    ),
+
+    val verdeCorpaliv = Color(0xFF286657)
+
+    TopAppBar(
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = verdeCorpaliv),
+
         navigationIcon = {
             TextButton(
                 onClick = onMenuClick
             ) {
-                Text("MENU",color=Color.White)
+                Text(
+                    text = "☰ Menú",
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold
+                )
             }
         },
+
         title = {
-            Text("")
+            Text(
+                text = "CORPALIV",
+                color = Color.White)
         }
     )
 }

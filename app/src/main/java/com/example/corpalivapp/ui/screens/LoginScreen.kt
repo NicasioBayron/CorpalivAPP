@@ -5,26 +5,28 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.corpalivapp.viewmodel.LoginUiState
-import com.example.corpalivapp.viewmodel.LoginViewModel
-import androidx.compose.ui.platform.LocalContext
+
 import com.example.corpalivapp.data.DatabaseProvider
 import com.example.corpalivapp.data.PasswordUtils
 import com.example.corpalivapp.data.Usuario
+import com.example.corpalivapp.viewmodel.LoginUiState
+import com.example.corpalivapp.viewmodel.LoginViewModel
 import com.example.corpalivapp.viewmodel.validation.LoginValidator
+
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -34,26 +36,28 @@ import java.util.Locale
 fun LoginScreen(
     modifier: Modifier = Modifier,
     loginViewModel: LoginViewModel = viewModel(),
+    modoOscuro: Boolean = false,
     onMenuClick: () -> Unit = {},
     onLoginExitoso: (Int) -> Unit = {}
 ) {
     val estado by loginViewModel.uiState.collectAsStateWithLifecycle()
+
     LaunchedEffect(estado.autenticado, estado.usuarioId) {
         if (estado.autenticado && estado.usuarioId != null) {
             onLoginExitoso(estado.usuarioId!!)
         }
     }
+
     var mostrarRegistro by remember { mutableStateOf(false) }
 
     val verde = Color(0xFF286657)
-    val fondo = Color(0xFFFAF8F5)
+    val fondo = if (modoOscuro) Color(0xFF202820) else Color(0xFFFAF8F5)
 
     Column(
         modifier = modifier
             .fillMaxSize()
             .background(fondo)
     ) {
-
         // ENCABEZADO
         Row(
             modifier = Modifier
@@ -80,17 +84,16 @@ fun LoginScreen(
         }
 
         if (mostrarRegistro) {
-
             RegistroContenido(
+                modoOscuro = modoOscuro,
                 onVolverClick = {
                     mostrarRegistro = false
                 }
             )
-
         } else {
-
             LoginContenido(
                 estado = estado,
+                modoOscuro = modoOscuro,
                 onCorreoChange = loginViewModel::actualizarCorreo,
                 onClaveChange = loginViewModel::actualizarClave,
                 onValidarClick = loginViewModel::validarFormulario,
@@ -109,10 +112,25 @@ fun LoginContenido(
     onClaveChange: (String) -> Unit,
     onValidarClick: () -> Unit,
     onRegistroClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    modoOscuro: Boolean = false
 ) {
-
     val verde = Color(0xFF286657)
+    val colorTexto = if (modoOscuro) Color.White else Color(0xFF35443D)
+    val colorTitulo = if (modoOscuro) Color(0xFFB5E2C8) else verde
+    val fondoCampo = if (modoOscuro) Color(0xFF304037) else Color.White
+
+    val coloresCampo = OutlinedTextFieldDefaults.colors(
+        focusedTextColor = colorTexto,
+        unfocusedTextColor = colorTexto,
+        focusedContainerColor = fondoCampo,
+        unfocusedContainerColor = fondoCampo,
+        focusedBorderColor = colorTitulo,
+        unfocusedBorderColor = if (modoOscuro) Color.LightGray else Color.Gray,
+        focusedLabelColor = colorTitulo,
+        unfocusedLabelColor = colorTexto,
+        cursorColor = colorTitulo
+    )
 
     Column(
         modifier = modifier
@@ -122,15 +140,17 @@ fun LoginContenido(
         verticalArrangement = Arrangement.spacedBy(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-
         Text(
             text = "Bienvenido",
-            color = verde,
+            color = colorTitulo,
             fontSize = 28.sp,
             fontWeight = FontWeight.Bold
         )
 
-        Text("Ingresa tus datos para continuar")
+        Text(
+            text = "Ingresa tus datos para continuar",
+            color = colorTexto
+        )
 
         OutlinedTextField(
             value = estado.correo,
@@ -146,7 +166,8 @@ fun LoginContenido(
                 estado.errorCorreo?.let { error ->
                     Text(error)
                 }
-            }
+            },
+            colors = coloresCampo
         )
 
         OutlinedTextField(
@@ -164,7 +185,8 @@ fun LoginContenido(
                 estado.errorClave?.let { error ->
                     Text(error)
                 }
-            }
+            },
+            colors = coloresCampo
         )
 
         Button(
@@ -172,7 +194,8 @@ fun LoginContenido(
             enabled = !estado.cargando,
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(
-                containerColor = verde
+                containerColor = verde,
+                contentColor = Color.White
             ),
             shape = RoundedCornerShape(12.dp)
         ) {
@@ -180,13 +203,16 @@ fun LoginContenido(
         }
 
         estado.mensaje?.let { mensaje ->
-            Text(text = mensaje)
+            Text(
+                text = mensaje,
+                color = colorTexto
+            )
         }
 
         TextButton(onClick = onRegistroClick) {
             Text(
                 text = "¿No tienes una cuenta? Regístrate",
-                color = verde
+                color = colorTitulo
             )
         }
     }
@@ -194,15 +220,31 @@ fun LoginContenido(
 
 @Composable
 fun RegistroContenido(
-    onVolverClick: () -> Unit
+    onVolverClick: () -> Unit,
+    modoOscuro: Boolean = false
 ) {
-
     val verde = Color(0xFF286657)
+    val colorTexto = if (modoOscuro) Color.White else Color(0xFF35443D)
+    val colorTitulo = if (modoOscuro) Color(0xFFB5E2C8) else verde
+    val fondoCampo = if (modoOscuro) Color(0xFF304037) else Color.White
+
+    val coloresCampo = OutlinedTextFieldDefaults.colors(
+        focusedTextColor = colorTexto,
+        unfocusedTextColor = colorTexto,
+        focusedContainerColor = fondoCampo,
+        unfocusedContainerColor = fondoCampo,
+        focusedBorderColor = colorTitulo,
+        unfocusedBorderColor = if (modoOscuro) Color.LightGray else Color.Gray,
+        focusedLabelColor = colorTitulo,
+        unfocusedLabelColor = colorTexto,
+        cursorColor = colorTitulo
+    )
 
     var nombre by remember { mutableStateOf("") }
     var correo by remember { mutableStateOf("") }
     var clave by remember { mutableStateOf("") }
     var mensaje by remember { mutableStateOf("") }
+
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
 
@@ -216,22 +258,26 @@ fun RegistroContenido(
         verticalArrangement = Arrangement.spacedBy(16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-
         Text(
             text = "Crear cuenta",
             fontSize = 26.sp,
             fontWeight = FontWeight.Bold,
-            color = verde
+            color = colorTitulo
         )
 
-        Text("Completa tus datos para registrarte")
+        Text(
+            text = "Completa tus datos para registrarte",
+            color = colorTexto
+        )
 
         OutlinedTextField(
             value = nombre,
             onValueChange = { nombre = it },
             label = { Text("Nombre completo") },
             modifier = Modifier.fillMaxWidth(),
-            singleLine = true
+            singleLine = true,
+            enabled = !registrando,
+            colors = coloresCampo
         )
 
         OutlinedTextField(
@@ -240,9 +286,11 @@ fun RegistroContenido(
             label = { Text("Correo electrónico") },
             modifier = Modifier.fillMaxWidth(),
             singleLine = true,
+            enabled = !registrando,
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Email
-            )
+            ),
+            colors = coloresCampo
         )
 
         OutlinedTextField(
@@ -251,10 +299,12 @@ fun RegistroContenido(
             label = { Text("Contraseña") },
             modifier = Modifier.fillMaxWidth(),
             singleLine = true,
+            enabled = !registrando,
             visualTransformation = PasswordVisualTransformation(),
             keyboardOptions = KeyboardOptions(
                 keyboardType = KeyboardType.Password
-            )
+            ),
+            colors = coloresCampo
         )
 
         Button(
@@ -333,7 +383,8 @@ fun RegistroContenido(
                     clave.isNotBlank(),
             modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(
-                containerColor = verde
+                containerColor = verde,
+                contentColor = Color.White
             )
         ) {
             Text(
@@ -345,14 +396,14 @@ fun RegistroContenido(
         if (mensaje.isNotEmpty()) {
             Text(
                 text = mensaje,
-                color = verde
+                color = colorTitulo
             )
         }
 
         TextButton(onClick = onVolverClick) {
             Text(
                 text = "Volver a iniciar sesión",
-                color = verde
+                color = colorTitulo
             )
         }
     }

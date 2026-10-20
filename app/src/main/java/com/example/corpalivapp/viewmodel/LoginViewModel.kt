@@ -22,7 +22,7 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
     private val _uiState = MutableStateFlow(LoginUiState())
     val uiState = _uiState.asStateFlow()
 
-    // ACTUALIZAR CORREO
+    // Actualizar correo
     fun actualizarCorreo(valor: String) {
         _uiState.update { estado ->
             estado.copy(
@@ -33,7 +33,7 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    // ACTUALIZAR CONTRASEÑA
+    // Actualizar contraseña
     fun actualizarClave(valor: String) {
         _uiState.update { estado ->
             estado.copy(
@@ -44,7 +44,7 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    // INICIAR SESIÓN
+    // Iniciar sesion
     fun validarFormulario() {
 
         val estado = _uiState.value
@@ -61,7 +61,7 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
             null
         }
 
-        // COMPROBAR CAMPOS
+        // Comprobar campos
         if (errorCorreo != null || errorClave != null) {
             _uiState.update {
                 it.copy(
@@ -84,7 +84,7 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
             )
         }
 
-        // CONSULTAR BASE DE DATOS
+        // Consultar base de datos
         viewModelScope.launch {
 
             try {

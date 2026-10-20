@@ -23,12 +23,37 @@ import kotlinx.coroutines.withContext
 fun UsuarioScreen(
     usuarioId: Int,
     modifier: Modifier = Modifier,
+    modoOscuro: Boolean = false,
     onMenuClick: () -> Unit = {},
     onInicioClick: () -> Unit = {},
     onCerrarSesion: () -> Unit = {}
 ) {
     val verde = Color(0xFF286657)
-    val fondo = Color(0xFFFAF8F5)
+
+    // Colores segun modo
+    val fondo = if (modoOscuro) {
+        Color(0xFF202820)
+    } else {
+        Color(0xFFFAF8F5)
+    }
+
+    val colorTexto = if (modoOscuro) {
+        Color.White
+    } else {
+        Color(0xFF35443D)
+    }
+
+    val colorTitulo = if (modoOscuro) {
+        Color(0xFFB5E2C8)
+    } else {
+        verde
+    }
+
+    val fondoTarjeta = if (modoOscuro) {
+        Color(0xFF30483C)
+    } else {
+        Color(0xFFE8EFE9)
+    }
 
     val context = LocalContext.current
 
@@ -40,7 +65,7 @@ fun UsuarioScreen(
         mutableStateOf(true)
     }
 
-    // Buscar los datos del usuario en Room
+    // BUSCAR LOS DATOS DEL USUARIO EN ROOM
     LaunchedEffect(usuarioId) {
         cargando = true
 
@@ -95,24 +120,34 @@ fun UsuarioScreen(
             modifier = Modifier.padding(24.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
+
             Text(
                 text = "Mi perfil",
                 fontSize = 26.sp,
                 fontWeight = FontWeight.Bold,
-                color = verde
+                color = colorTitulo
             )
 
-            Text("Información de tu cuenta")
+            Text(
+                text = "Información de tu cuenta",
+                color = colorTexto
+            )
 
             if (cargando) {
-                CircularProgressIndicator(color = verde)
+                CircularProgressIndicator(
+                    color = colorTitulo
+                )
             } else if (usuario == null) {
-                Text("No se pudo cargar la información del usuario")
+                Text(
+                    text = "No se pudo cargar la información del usuario",
+                    color = colorTexto
+                )
             } else {
+
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(
-                        containerColor = Color(0xFFE8EFE9)
+                        containerColor = fondoTarjeta
                     ),
                     shape = RoundedCornerShape(16.dp)
                 ) {
@@ -120,42 +155,64 @@ fun UsuarioScreen(
                         modifier = Modifier.padding(20.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
+
                         Text(
                             text = "Nombre",
                             fontWeight = FontWeight.Bold,
-                            color = verde
+                            color = colorTitulo
                         )
 
-                        Text(usuario!!.nombre)
+                        Text(
+                            text = usuario!!.nombre,
+                            color = colorTexto
+                        )
 
-                        HorizontalDivider()
+                        HorizontalDivider(
+                            color = if (modoOscuro) {
+                                Color(0xFF64776A)
+                            } else {
+                                Color(0xFFCED8D0)
+                            }
+                        )
 
                         Text(
                             text = "Correo electrónico",
                             fontWeight = FontWeight.Bold,
-                            color = verde
+                            color = colorTitulo
                         )
 
-                        Text(usuario!!.correo)
+                        Text(
+                            text = usuario!!.correo,
+                            color = colorTexto
+                        )
                     }
                 }
             }
 
+            // Volver al inicio
             Button(
                 onClick = onInicioClick,
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = verde
+                    containerColor = verde,
+                    contentColor = Color.White
                 )
             ) {
                 Text("Volver al inicio")
             }
 
+            // Cerrar sesion
             OutlinedButton(
                 onClick = onCerrarSesion,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.outlinedButtonColors(
+                    contentColor = colorTitulo
+                )
             ) {
-                Text("Cerrar sesión", color = verde)
+                Text(
+                    text = "Cerrar sesión",
+                    color = colorTitulo
+                )
             }
         }
     }

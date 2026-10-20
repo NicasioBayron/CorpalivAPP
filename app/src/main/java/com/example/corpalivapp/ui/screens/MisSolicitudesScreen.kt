@@ -29,10 +29,48 @@ import java.util.Locale
 fun MisSolicitudesScreen(
     usuarioId: Int,
     modifier: Modifier = Modifier,
+    modoOscuro: Boolean = false,
     onMenuClick: () -> Unit = {}
 ) {
     val verde = Color(0xFF286657)
-    val fondo = Color(0xFFFAF8F5)
+
+    // COLORES SEGÚN EL MODO
+    val fondo = if (modoOscuro) {
+        Color(0xFF202820)
+    } else {
+        Color(0xFFFAF8F5)
+    }
+
+    val colorTexto = if (modoOscuro) {
+        Color.White
+    } else {
+        Color(0xFF35443D)
+    }
+
+    val colorTitulo = if (modoOscuro) {
+        Color(0xFFB5E2C8)
+    } else {
+        verde
+    }
+
+    val fondoTarjeta = if (modoOscuro) {
+        Color(0xFF30483C)
+    } else {
+        Color.White
+    }
+
+    val colorSecundario = if (modoOscuro) {
+        Color(0xFFCBD5CD)
+    } else {
+        Color.Gray
+    }
+
+    val colorDivisor = if (modoOscuro) {
+        Color(0xFF64776A)
+    } else {
+        Color(0xFFDDDDDD)
+    }
+
     val context = LocalContext.current
 
     var solicitudes by remember(usuarioId) {
@@ -47,6 +85,7 @@ fun MisSolicitudesScreen(
         mutableStateOf(false)
     }
 
+    // Consultar solicitudes usuario room
     LaunchedEffect(usuarioId) {
         cargando = true
         error = false
@@ -71,7 +110,7 @@ fun MisSolicitudesScreen(
             .background(fondo)
     ) {
 
-        // ENCABEZADO
+        // Encabezado
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -96,14 +135,16 @@ fun MisSolicitudesScreen(
             }
         }
 
-        // CONTENIDO
+        // Contenido
         when {
             cargando -> {
                 Box(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
                 ) {
-                    CircularProgressIndicator(color = verde)
+                    CircularProgressIndicator(
+                        color = colorTitulo
+                    )
                 }
             }
 
@@ -114,7 +155,10 @@ fun MisSolicitudesScreen(
                         .padding(24.dp),
                     contentAlignment = Alignment.Center
                 ) {
-                    Text("No se pudieron cargar las solicitudes.")
+                    Text(
+                        text = "No se pudieron cargar las solicitudes.",
+                        color = colorTexto
+                    )
                 }
             }
 
@@ -127,7 +171,7 @@ fun MisSolicitudesScreen(
                 ) {
                     Text(
                         text = "Todavía no tienes solicitudes registradas.",
-                        color = Color.Gray
+                        color = colorSecundario
                     )
                 }
             }
@@ -138,43 +182,44 @@ fun MisSolicitudesScreen(
                     contentPadding = PaddingValues(16.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-
                     items(solicitudes) { solicitud ->
-
                         Card(
                             modifier = Modifier.fillMaxWidth(),
                             shape = RoundedCornerShape(12.dp),
                             colors = CardDefaults.cardColors(
-                                containerColor = Color.White
+                                containerColor = fondoTarjeta
                             )
                         ) {
                             Column(
                                 modifier = Modifier.padding(16.dp),
-                                verticalArrangement =
-                                    Arrangement.spacedBy(8.dp)
+                                verticalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
-
                                 Text(
                                     text = solicitud.tipoColaboracion,
-                                    color = verde,
+                                    color = colorTitulo,
                                     fontSize = 18.sp,
                                     fontWeight = FontWeight.Bold
                                 )
 
                                 Text(
-                                    text = solicitud.mensaje
+                                    text = solicitud.mensaje,
+                                    color = colorTexto
                                 )
 
-                                HorizontalDivider()
+                                HorizontalDivider(
+                                    color = colorDivisor
+                                )
 
                                 Text(
                                     text = "Nombre: ${solicitud.nombre}",
-                                    fontSize = 13.sp
+                                    fontSize = 13.sp,
+                                    color = colorTexto
                                 )
 
                                 Text(
                                     text = "Correo: ${solicitud.correo}",
-                                    fontSize = 13.sp
+                                    fontSize = 13.sp,
+                                    color = colorTexto
                                 )
 
                                 val fecha = remember(
@@ -191,7 +236,7 @@ fun MisSolicitudesScreen(
                                 Text(
                                     text = "Fecha: $fecha",
                                     fontSize = 12.sp,
-                                    color = Color.Gray
+                                    color = colorSecundario
                                 )
                             }
                         }

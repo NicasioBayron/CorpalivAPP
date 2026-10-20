@@ -17,11 +17,48 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun NosotrosScreen(
     modifier: Modifier = Modifier,
+    modoOscuro: Boolean = false,
     onMenuClick: () -> Unit = {}
 ) {
 
     val verde = Color(0xFF286657)
-    val fondo = Color(0xFFFAF8F5)
+
+    // Colores segun el modo
+    val fondo = if (modoOscuro) {
+        Color(0xFF202820)
+    } else {
+        Color(0xFFFAF8F5)
+    }
+
+    val colorTexto = if (modoOscuro) {
+        Color.White
+    } else {
+        Color(0xFF35443D)
+    }
+
+    val colorTitulo = if (modoOscuro) {
+        Color(0xFFB5E2C8)
+    } else {
+        verde
+    }
+
+    val fondoTarjetaVerde = if (modoOscuro) {
+        Color(0xFF30483C)
+    } else {
+        Color(0xFFE8EFE9)
+    }
+
+    val fondoTarjetaBeige = if (modoOscuro) {
+        Color(0xFF4A3B32)
+    } else {
+        Color(0xFFF4E8D9)
+    }
+
+    val colorTituloBeige = if (modoOscuro) {
+        Color(0xFFFFD3A8)
+    } else {
+        verde
+    }
 
     Column(
         modifier = modifier
@@ -30,7 +67,7 @@ fun NosotrosScreen(
             .verticalScroll(rememberScrollState())
     ) {
 
-        // ENCABEZADO
+        // Encabezado
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -39,7 +76,6 @@ fun NosotrosScreen(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-
             Text(
                 text = "Sobre nosotros",
                 color = Color.White,
@@ -56,7 +92,7 @@ fun NosotrosScreen(
             }
         }
 
-        // CONTENIDO
+        // Contenido
         Column(
             modifier = Modifier.padding(24.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -66,109 +102,120 @@ fun NosotrosScreen(
                 text = "Conoce CORPALIV",
                 fontSize = 26.sp,
                 fontWeight = FontWeight.Bold,
-                color = verde
+                color = colorTitulo
             )
 
             Text(
-                text = "Trabajamos para promover oportunidades de inclusión y participación."
+                text = "Trabajamos para promover oportunidades de inclusión y participación.",
+                color = colorTexto
             )
 
-            // QUIÉNES SOMOS
+            // Quienes somos
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(
-                    containerColor = Color(0xFFE8EFE9)
+                    containerColor = fondoTarjetaVerde
                 ),
                 shape = RoundedCornerShape(16.dp)
             ) {
-                Column(modifier = Modifier.padding(20.dp)) {
-
+                Column(
+                    modifier = Modifier.padding(20.dp)
+                ) {
                     Text(
                         text = "¿Quiénes somos?",
                         fontWeight = FontWeight.Bold,
-                        color = verde,
+                        color = colorTitulo,
                         fontSize = 18.sp
                     )
 
                     Spacer(modifier = Modifier.height(8.dp))
 
                     Text(
-                        text = "CORPALIV es una organización enfocada en promover la inclusión y generar oportunidades para las personas."
+                        text = "CORPALIV es una organización enfocada en promover la inclusión y generar oportunidades para las personas.",
+                        color = colorTexto
                     )
                 }
             }
 
-            // MISIÓN
+            // Mision
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(
-                    containerColor = Color(0xFFF4E8D9)
+                    containerColor = fondoTarjetaBeige
                 ),
                 shape = RoundedCornerShape(16.dp)
             ) {
-                Column(modifier = Modifier.padding(20.dp)) {
-
+                Column(
+                    modifier = Modifier.padding(20.dp)
+                ) {
                     Text(
                         text = "Nuestra misión",
                         fontWeight = FontWeight.Bold,
-                        color = verde,
+                        color = colorTituloBeige,
                         fontSize = 18.sp
                     )
 
                     Spacer(modifier = Modifier.height(8.dp))
 
                     Text(
-                        text = "Impulsar espacios de aprendizaje, desarrollo y participación inclusiva."
+                        text = "Impulsar espacios de aprendizaje, desarrollo y participación inclusiva.",
+                        color = colorTexto
                     )
                 }
             }
 
-            // PROGRAMAS
+            // Programas
             Text(
                 text = "Nuestros programas",
                 fontSize = 22.sp,
                 fontWeight = FontWeight.Bold,
-                color = verde
+                color = colorTitulo
             )
 
+            // Escuela JAN VAN DIJK
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(
-                    containerColor = Color(0xFFE8EFE9)
+                    containerColor = fondoTarjetaVerde
                 ),
                 shape = RoundedCornerShape(16.dp)
             ) {
-                Column(modifier = Modifier.padding(20.dp)) {
-
+                Column(
+                    modifier = Modifier.padding(20.dp)
+                ) {
                     Text(
                         text = "Escuela Jan Van Dijk",
                         fontWeight = FontWeight.Bold,
-                        color = verde
+                        color = colorTitulo
                     )
 
                     Text(
-                        text = "Programa orientado a la educación y el desarrollo."
+                        text = "Programa orientado a la educación y el desarrollo.",
+                        color = colorTexto
                     )
                 }
             }
 
+            // ALBA LAB
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(
-                    containerColor = Color(0xFFF4E8D9)
+                    containerColor = fondoTarjetaBeige
                 ),
                 shape = RoundedCornerShape(16.dp)
             ) {
-                Column(modifier = Modifier.padding(20.dp)) {
-
+                Column(
+                    modifier = Modifier.padding(20.dp)
+                ) {
                     Text(
                         text = "Alba Lab",
                         fontWeight = FontWeight.Bold,
-                        color = verde
+                        color = colorTituloBeige
                     )
 
                     Text(
-                        text = "Programa enfocado en la inclusión y las oportunidades laborales."
+                        text = "Programa enfocado en la inclusión y las oportunidades laborales.",
+                        color = colorTexto
                     )
                 }
             }

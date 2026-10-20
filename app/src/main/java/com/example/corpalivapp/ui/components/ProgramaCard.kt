@@ -22,28 +22,66 @@ import androidx.compose.ui.unit.sp
 fun ProgramaCard(
     titulo: String,
     descripcion: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    modoOscuro: Boolean = false
 ) {
 
-    // Identificamos el programa para elegir sus colores
-    val esEscuela = titulo.contains("Escuela", ignoreCase = true)
+    // Identificamos el programa
+    val esEscuela = titulo.contains(
+        "Escuela",
+        ignoreCase = true
+    )
 
-    val colorFondo = if (esEscuela) {
-        Color(0xFFE8EFE9)
+    // COLOR DE FONDO
+    val colorFondo = if (modoOscuro) {
+        if (esEscuela) {
+            Color(0xFF30483C)
+        } else {
+            Color(0xFF4A3B32)
+        }
     } else {
-        Color(0xFFF4E8D9)
+        if (esEscuela) {
+            Color(0xFFE8EFE9)
+        } else {
+            Color(0xFFF4E8D9)
+        }
     }
 
-    val colorPrincipal = if (esEscuela) {
-        Color(0xFF286657)
+    // COLOR DEL TÍTULO
+    val colorPrincipal = if (modoOscuro) {
+        if (esEscuela) {
+            Color(0xFFB5E2C8)
+        } else {
+            Color(0xFFFFD3A8)
+        }
     } else {
-        Color(0xFF935A30)
+        if (esEscuela) {
+            Color(0xFF286657)
+        } else {
+            Color(0xFF935A30)
+        }
     }
 
-    val colorIcono = if (esEscuela) {
-        Color(0xFFD0E2D6)
+    // COLOR DEL ICONO
+    val colorIcono = if (modoOscuro) {
+        if (esEscuela) {
+            Color(0xFF466453)
+        } else {
+            Color(0xFF665043)
+        }
     } else {
-        Color(0xFFEBD5BC)
+        if (esEscuela) {
+            Color(0xFFD0E2D6)
+        } else {
+            Color(0xFFEBD5BC)
+        }
+    }
+
+    // COLOR DE LA DESCRIPCIÓN
+    val colorDescripcion = if (modoOscuro) {
+        Color(0xFFE5EAE5)
+    } else {
+        Color(0xFF48534D)
     }
 
     val simbolo = if (esEscuela) "🎓" else "💼"
@@ -65,7 +103,7 @@ fun ProgramaCard(
             horizontalAlignment = Alignment.Start
         ) {
 
-            // El icono
+            // ICONO
             Box(
                 modifier = Modifier
                     .background(
@@ -81,7 +119,7 @@ fun ProgramaCard(
                 )
             }
 
-            // el titulo
+            // TÍTULO
             Text(
                 text = titulo,
                 fontSize = 20.sp,
@@ -89,12 +127,12 @@ fun ProgramaCard(
                 color = colorPrincipal
             )
 
-            // La descripcion
+            // DESCRIPCIÓN
             Text(
                 text = descripcion,
                 fontSize = 14.sp,
                 lineHeight = 21.sp,
-                color = Color(0xFF48534D)
+                color = colorDescripcion
             )
         }
     }

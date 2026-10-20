@@ -24,14 +24,38 @@ import kotlinx.coroutines.launch
 fun OpcionesDeslizante(
     pantallaActual: String,
     onPantallaSeleccionada: (String) -> Unit,
+    modoOscuro: Boolean = false,
     contenido: @Composable (abrirMenu: () -> Unit) -> Unit
 ) {
-
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
     val verdeCorpaliv = Color(0xFF286657)
-    val fondoCrema = Color(0xFFFAF8F5)
+
+    // Colores segun el modo
+    val fondoMenu = if (modoOscuro) {
+        Color(0xFF202820)
+    } else {
+        Color(0xFFFAF8F5)
+    }
+
+    val colorTexto = if (modoOscuro) {
+        Color.White
+    } else {
+        Color(0xFF35443D)
+    }
+
+    val fondoSeleccionado = if (modoOscuro) {
+        Color(0xFF30483C)
+    } else {
+        Color(0xFFE8EFE9)
+    }
+
+    val textoSeleccionado = if (modoOscuro) {
+        Color(0xFFB5E2C8)
+    } else {
+        verdeCorpaliv
+    }
 
     val opciones = listOf(
         "Inicio",
@@ -46,12 +70,11 @@ fun OpcionesDeslizante(
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
-
             ModalDrawerSheet(
-                drawerContainerColor = fondoCrema
+                drawerContainerColor = fondoMenu
             ) {
 
-                // ENCABEZADO DEL MENÚ
+                // Encabezado del menu
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -59,7 +82,6 @@ fun OpcionesDeslizante(
                         .padding(24.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-
                     Text(
                         text = "CORPALIV",
                         color = Color.White,
@@ -72,14 +94,12 @@ fun OpcionesDeslizante(
                     )
                 }
 
-                // OPCIONES DEL MENÚ
+                // Las opciones del menu
                 Column(
                     modifier = Modifier.padding(12.dp),
                     verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
-
                     opciones.forEach { opcion ->
-
                         NavigationDrawerItem(
                             label = {
                                 Text(text = opcion)
@@ -93,9 +113,9 @@ fun OpcionesDeslizante(
                                 }
                             },
                             colors = NavigationDrawerItemDefaults.colors(
-                                selectedContainerColor = Color(0xFFE8EFE9),
-                                selectedTextColor = verdeCorpaliv,
-                                unselectedTextColor = Color(0xFF35443D)
+                                selectedContainerColor = fondoSeleccionado,
+                                selectedTextColor = textoSeleccionado,
+                                unselectedTextColor = colorTexto
                             )
                         )
                     }
@@ -103,7 +123,6 @@ fun OpcionesDeslizante(
             }
         }
     ) {
-
         contenido {
             scope.launch {
                 drawerState.open()

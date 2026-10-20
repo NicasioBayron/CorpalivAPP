@@ -35,16 +35,15 @@ fun App() {
         mutableStateOf<Int?>(null)
     }
 
-    // ESTADO GLOBAL DEL MODO OSCURO
+    // Estado global del modo oscuro
     var modoOscuro by rememberSaveable {
         mutableStateOf(false)
     }
 
     OpcionesDeslizante(
         pantallaActual = pantallaActual,
-        onPantallaSeleccionada = { opcion ->
-            pantallaActual = opcion
-        }
+        onPantallaSeleccionada = { pantallaActual = it },
+        modoOscuro = modoOscuro
     ) { abrirMenu ->
 
         Surface(
@@ -67,6 +66,7 @@ fun App() {
                         UsuarioScreen(
                             usuarioId = usuarioId!!,
                             modifier = Modifier.fillMaxSize(),
+                            modoOscuro = modoOscuro,
                             onMenuClick = abrirMenu,
                             onInicioClick = {
                                 pantallaActual = "Inicio"
@@ -87,6 +87,7 @@ fun App() {
                 "Iniciar sesión" -> LoginScreen(
                     modifier = Modifier.fillMaxSize(),
                     loginViewModel = loginViewModel,
+                    modoOscuro = modoOscuro,
                     onMenuClick = abrirMenu,
                     onLoginExitoso = { id ->
                         usuarioId = id
@@ -119,6 +120,7 @@ fun App() {
 
                 "Aportes" -> AportesScreen(
                     modifier = Modifier.fillMaxSize(),
+                    modoOscuro = modoOscuro,
                     onMenuClick = abrirMenu,
                     onContactoClick = {
                         pantallaActual = "Contactanos"
@@ -128,11 +130,13 @@ fun App() {
                 "Contactanos" -> ContactoScreen(
                     modifier = Modifier.fillMaxSize(),
                     usuarioId = usuarioId,
+                    modoOscuro = modoOscuro,
                     onMenuClick = abrirMenu
                 )
 
                 "Sobre nosotros" -> NosotrosScreen(
                     modifier = Modifier.fillMaxSize(),
+                    modoOscuro = modoOscuro,
                     onMenuClick = abrirMenu
                 )
 
@@ -141,6 +145,7 @@ fun App() {
                         MisSolicitudesScreen(
                             usuarioId = usuarioId!!,
                             modifier = Modifier.fillMaxSize(),
+                            modoOscuro = modoOscuro,
                             onMenuClick = abrirMenu
                         )
                     } else {

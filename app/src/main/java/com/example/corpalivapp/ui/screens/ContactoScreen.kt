@@ -27,10 +27,51 @@ import kotlinx.coroutines.withContext
 fun ContactoScreen(
     modifier: Modifier = Modifier,
     usuarioId: Int? = null,
+    modoOscuro: Boolean = false,
     onMenuClick: () -> Unit = {}
 ) {
     val verde = Color(0xFF286657)
-    val fondo = Color(0xFFFAF8F5)
+
+    // Colores modo claro y oscuro
+    val fondo = if (modoOscuro) {
+        Color(0xFF202820)
+    } else {
+        Color(0xFFFAF8F5)
+    }
+
+    val colorTexto = if (modoOscuro) {
+        Color.White
+    } else {
+        Color(0xFF35443D)
+    }
+
+    val colorTitulo = if (modoOscuro) {
+        Color(0xFFB5E2C8)
+    } else {
+        verde
+    }
+
+    val colorCampo = if (modoOscuro) {
+        Color(0xFF304037)
+    } else {
+        Color.White
+    }
+
+    val coloresCampo = OutlinedTextFieldDefaults.colors(
+        focusedTextColor = colorTexto,
+        unfocusedTextColor = colorTexto,
+        focusedContainerColor = colorCampo,
+        unfocusedContainerColor = colorCampo,
+        focusedBorderColor = colorTitulo,
+        unfocusedBorderColor = if (modoOscuro) {
+            Color(0xFF91A79A)
+        } else {
+            Color.Gray
+        },
+        focusedLabelColor = colorTitulo,
+        unfocusedLabelColor = colorTexto,
+        cursorColor = colorTitulo
+    )
 
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -38,6 +79,7 @@ fun ContactoScreen(
     var nombre by remember { mutableStateOf("") }
     var correo by remember { mutableStateOf("") }
     var mensaje by remember { mutableStateOf("") }
+
     var tipoColaboracion by remember {
         mutableStateOf("Donaciones")
     }
@@ -53,7 +95,7 @@ fun ContactoScreen(
             .verticalScroll(rememberScrollState())
     ) {
 
-        // ENCABEZADO
+        // Enca
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -78,7 +120,7 @@ fun ContactoScreen(
             }
         }
 
-        // FORMULARIO
+        // Formu
         Column(
             modifier = Modifier.padding(24.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -88,13 +130,15 @@ fun ContactoScreen(
                 text = "¡Hablemos!",
                 fontSize = 26.sp,
                 fontWeight = FontWeight.Bold,
-                color = verde
+                color = colorTitulo
             )
 
             Text(
-                text = "Completa el formulario y cuéntanos cómo te gustaría colaborar con CORPALIV."
+                text = "Completa el formulario y cuéntanos cómo te gustaría colaborar con CORPALIV.",
+                color = colorTexto
             )
 
+            // Nombre
             OutlinedTextField(
                 value = nombre,
                 onValueChange = {
@@ -104,9 +148,11 @@ fun ContactoScreen(
                 label = { Text("Nombre completo") },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
-                enabled = !guardando
+                enabled = !guardando,
+                colors = coloresCampo
             )
 
+            // Correo
             OutlinedTextField(
                 value = correo,
                 onValueChange = {
@@ -116,15 +162,17 @@ fun ContactoScreen(
                 label = { Text("Correo electrónico") },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
-                enabled = !guardando
+                enabled = !guardando,
+                colors = coloresCampo
             )
 
             Text(
                 text = "¿Cómo deseas colaborar?",
                 fontWeight = FontWeight.Bold,
-                color = verde
+                color = colorTitulo
             )
 
+            // Tipos de colaboracion
             val opciones = listOf(
                 "Donaciones",
                 "Voluntariado",
@@ -142,13 +190,21 @@ fun ContactoScreen(
                             tipoColaboracion = opcion
                             mensajeResultado = ""
                         },
-                        enabled = !guardando
+                        enabled = !guardando,
+                        colors = RadioButtonDefaults.colors(
+                            selectedColor = colorTitulo,
+                            unselectedColor = colorTexto
+                        )
                     )
 
-                    Text(text = opcion)
+                    Text(
+                        text = opcion,
+                        color = colorTexto
+                    )
                 }
             }
 
+            // Mensaje
             OutlinedTextField(
                 value = mensaje,
                 onValueChange = {
@@ -160,10 +216,11 @@ fun ContactoScreen(
                     .fillMaxWidth()
                     .height(130.dp),
                 maxLines = 5,
-                enabled = !guardando
+                enabled = !guardando,
+                colors = coloresCampo
             )
 
-            // BOTÓN GUARDAR
+            // Boton guardar
             Button(
                 onClick = {
                     val nombreLimpio = nombre.trim()
@@ -219,7 +276,8 @@ fun ContactoScreen(
                 },
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = verde
+                    containerColor = verde,
+                    contentColor = Color.White
                 ),
                 shape = RoundedCornerShape(12.dp),
                 enabled = !guardando &&
@@ -238,11 +296,12 @@ fun ContactoScreen(
                 }
             }
 
+            // Mensaje del resultado
             if (mensajeResultado.isNotEmpty()) {
                 Text(
                     text = mensajeResultado,
                     color = if (guardadoExitoso) {
-                        verde
+                        colorTitulo
                     } else {
                         MaterialTheme.colorScheme.error
                     },

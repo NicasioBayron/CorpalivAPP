@@ -27,21 +27,58 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun AportesScreen(
     modifier: Modifier = Modifier,
+    modoOscuro: Boolean = false,
     onMenuClick: () -> Unit = {},
     onContactoClick: () -> Unit = {}
 ) {
 
     val verdeCorpaliv = Color(0xFF286657)
-    val fondoCrema = Color(0xFFFAF8F5)
+
+    // Colores segun el modo
+    val fondo = if (modoOscuro) {
+        Color(0xFF202820)
+    } else {
+        Color(0xFFFAF8F5)
+    }
+
+    val colorTexto = if (modoOscuro) {
+        Color.White
+    } else {
+        Color(0xFF35443D)
+    }
+
+    val colorTitulo = if (modoOscuro) {
+        Color(0xFFB5E2C8)
+    } else {
+        verdeCorpaliv
+    }
+
+    val fondoVerde = if (modoOscuro) {
+        Color(0xFF30483C)
+    } else {
+        Color(0xFFE8EFE9)
+    }
+
+    val fondoBeige = if (modoOscuro) {
+        Color(0xFF4A3B32)
+    } else {
+        Color(0xFFF4E8D9)
+    }
+
+    val colorVoluntariado = if (modoOscuro) {
+        Color(0xFFFFD3A8)
+    } else {
+        Color(0xFF935A30)
+    }
 
     Column(
         modifier = modifier
             .fillMaxSize()
-            .background(fondoCrema)
+            .background(fondo)
             .verticalScroll(rememberScrollState())
     ) {
 
-        // Encabezado
+        // ENCABEZADO
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -75,79 +112,97 @@ fun AportesScreen(
 
             Text(
                 text = "¡Sé parte del cambio!",
-                color = verdeCorpaliv,
+                color = colorTitulo,
                 fontSize = 26.sp,
                 fontWeight = FontWeight.Bold
             )
 
             Text(
-                text = "Tu colaboración nos ayuda a seguir promoviendo la inclusión social y laboral."
+                text = "Tu colaboración nos ayuda a seguir promoviendo la inclusión social y laboral.",
+                color = colorTexto
             )
 
-            // Tarjeta para las donaciones
+            // Dona
             Card(
+                modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(
-                    containerColor = Color(0xFFE8EFE9)
+                    containerColor = fondoVerde
                 ),
                 shape = RoundedCornerShape(16.dp)
             ) {
-                Column(modifier = Modifier.padding(20.dp)) {
+                Column(
+                    modifier = Modifier.padding(20.dp)
+                ) {
                     Text(
                         text = "Donaciones",
                         fontWeight = FontWeight.Bold,
-                        color = verdeCorpaliv
+                        color = colorTitulo
                     )
+
                     Text(
-                        text = "Apoya los programas y actividades de CORPALIV."
+                        text = "Apoya los programas y actividades de CORPALIV.",
+                        color = colorTexto
                     )
                 }
             }
 
-            // Tarjeta para el voluntariado
+            // Volun
             Card(
+                modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(
-                    containerColor = Color(0xFFF4E8D9)
+                    containerColor = fondoBeige
                 ),
                 shape = RoundedCornerShape(16.dp)
             ) {
-                Column(modifier = Modifier.padding(20.dp)) {
+                Column(
+                    modifier = Modifier.padding(20.dp)
+                ) {
                     Text(
                         text = "Voluntariado",
                         fontWeight = FontWeight.Bold,
-                        color = Color(0xFF935A30)
+                        color = colorVoluntariado
                     )
+
                     Text(
-                        text = "Participa en nuestras actividades e iniciativas."
+                        text = "Participa en nuestras actividades e iniciativas.",
+                        color = colorTexto
                     )
                 }
             }
 
-            // Tarjeta alianzas
+            // Ali
             Card(
+                modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(
-                    containerColor = Color(0xFFE8EFE9)
+                    containerColor = fondoVerde
                 ),
                 shape = RoundedCornerShape(16.dp)
             ) {
-                Column(modifier = Modifier.padding(20.dp)) {
+                Column(
+                    modifier = Modifier.padding(20.dp)
+                ) {
                     Text(
                         text = "Alianzas con empresas",
                         fontWeight = FontWeight.Bold,
-                        color = verdeCorpaliv
+                        color = colorTitulo
                     )
+
                     Text(
-                        text = "Colabora con nuestros programas de inclusión laboral."
+                        text = "Colabora con nuestros programas de inclusión laboral.",
+                        color = colorTexto
                     )
                 }
             }
 
-            // Boton de contacto
+            // Boton contacto
             Button(
                 onClick = onContactoClick,
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = verdeCorpaliv
-                )
+                    containerColor = verdeCorpaliv,
+                    contentColor = Color.White
+                ),
+                shape = RoundedCornerShape(12.dp)
             ) {
                 Text("Solicitar contacto")
             }

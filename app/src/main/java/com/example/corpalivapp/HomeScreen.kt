@@ -52,7 +52,7 @@ fun HomeScreen(
             .verticalScroll(rememberScrollState())
     ) {
 
-        // ENCABEZADO
+        // Encabezado
         Column(
             modifier = Modifier
                 .fillMaxWidth()
@@ -104,7 +104,7 @@ fun HomeScreen(
             )
         }
 
-        // CONTENIDO PRINCIPAL
+        // Contenido principal
         Column(
             modifier = Modifier
                 .fillMaxWidth()

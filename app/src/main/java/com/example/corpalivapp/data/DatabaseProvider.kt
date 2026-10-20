@@ -10,7 +10,7 @@ object DatabaseProvider {
     @Volatile
     private var instancia: AppDatabase? = null
 
-    // MIGRACIÓN 1 A 2
+    // Migracion 1 A 2
     // Agrega la tabla de solicitudes de contacto
     private val MIGRATION_1_2 = object : Migration(1, 2) {
 
@@ -30,7 +30,7 @@ object DatabaseProvider {
         }
     }
 
-    // MIGRACIÓN 2 A 3
+    // Migracion 2 A 3
     // Agrega el ID del usuario a las solicitudes existentes
     private val MIGRATION_2_3 = object : Migration(2, 3) {
 
@@ -44,7 +44,7 @@ object DatabaseProvider {
         }
     }
 
-    // OBTENER BASE DE DATOS
+    // obtener la base de datos
     fun obtenerDatabase(context: Context): AppDatabase {
 
         return instancia ?: synchronized(this) {

@@ -38,6 +38,7 @@ fun OpcionesDeslizante(
         "Iniciar sesión",
         "Ajustes",
         "Aportes",
+        "Mis solicitudes",
         "Contactanos",
         "Sobre nosotros"
     )

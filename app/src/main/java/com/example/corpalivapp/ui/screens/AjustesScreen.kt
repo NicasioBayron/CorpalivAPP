@@ -18,18 +18,13 @@ import androidx.compose.ui.unit.sp
 @Composable
 fun AjustesScreen(
     modifier: Modifier = Modifier,
-    onMenuClick: () -> Unit = {}
+    modoOscuro: Boolean = false,
+    onModoOscuroChange: (Boolean) -> Unit = {},
+    onMenuClick: () -> Unit = {},
+    onPerfilClick: () -> Unit = {},
+    onSolicitudesClick: () -> Unit = {}
 ) {
-
     val verde = Color(0xFF286657)
-
-    var notificaciones by rememberSaveable {
-        mutableStateOf(false)
-    }
-
-    var modoOscuro by rememberSaveable {
-        mutableStateOf(false)
-    }
 
     val fondo = if (modoOscuro) {
         Color(0xFF202820)
@@ -65,7 +60,6 @@ fun AjustesScreen(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-
             Text(
                 text = "Ajustes",
                 color = Color.White,
@@ -100,7 +94,7 @@ fun AjustesScreen(
                 color = colorTexto
             )
 
-            // TARJETA DE PREFERENCIAS
+            // APARIENCIA
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(
@@ -108,51 +102,64 @@ fun AjustesScreen(
                 ),
                 shape = RoundedCornerShape(16.dp)
             ) {
-
-                Column(
-                    modifier = Modifier.padding(16.dp)
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
+                    Column(
+                        modifier = Modifier.weight(1f)
                     ) {
-
-                        Text(
-                            text = "Notificaciones",
-                            color = colorTexto
-                        )
-
-                        Switch(
-                            checked = notificaciones,
-                            onCheckedChange = {
-                                notificaciones = it
-                            }
-                        )
-                    }
-
-                    HorizontalDivider()
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-
                         Text(
                             text = "Modo oscuro",
+                            fontWeight = FontWeight.Bold,
                             color = colorTexto
                         )
 
-                        Switch(
-                            checked = modoOscuro,
-                            onCheckedChange = {
-                                modoOscuro = it
-                            }
+                        Text(
+                            text = "Cambia la apariencia de Ajustes.",
+                            fontSize = 12.sp,
+                            color = colorTexto
                         )
                     }
+
+                    Switch(
+                        checked = modoOscuro,
+                        onCheckedChange = onModoOscuroChange
+                    )
                 }
+            }
+
+            // ACCESOS RÁPIDOS
+            Text(
+                text = "Mi cuenta",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                color = colorTexto
+            )
+
+            Button(
+                onClick = onPerfilClick,
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = verde
+                ),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Text("Ver mi perfil")
+            }
+
+            Button(
+                onClick = onSolicitudesClick,
+                modifier = Modifier.fillMaxWidth(),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = verde
+                ),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Text("Mis solicitudes")
             }
 
             // INFORMACIÓN
@@ -167,12 +174,10 @@ fun AjustesScreen(
                 ),
                 shape = RoundedCornerShape(16.dp)
             ) {
-
                 Column(
                     modifier = Modifier.padding(20.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-
                     Text(
                         text = "Acerca de la aplicación",
                         fontWeight = FontWeight.Bold,

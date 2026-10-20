@@ -102,6 +102,7 @@ fun App() {
 
                 "Contactanos" -> ContactoScreen(
                     modifier = Modifier.fillMaxSize(),
+                    usuarioId = usuarioId,
                     onMenuClick = abrirMenu
                 )
 

@@ -13,26 +13,38 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.platform.LocalContext
+
+import com.example.corpalivapp.data.DatabaseProvider
+import com.example.corpalivapp.data.SolicitudContacto
+import com.example.corpalivapp.viewmodel.validation.LoginValidator
+
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @Composable
 fun ContactoScreen(
     modifier: Modifier = Modifier,
+    usuarioId: Int? = null,
     onMenuClick: () -> Unit = {}
 ) {
-
     val verde = Color(0xFF286657)
     val fondo = Color(0xFFFAF8F5)
 
-    // Datos del formulario
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+
     var nombre by remember { mutableStateOf("") }
     var correo by remember { mutableStateOf("") }
     var mensaje by remember { mutableStateOf("") }
     var tipoColaboracion by remember {
         mutableStateOf("Donaciones")
     }
-    var mostrarMensaje by remember {
-        mutableStateOf(false)
-    }
+
+    var guardando by remember { mutableStateOf(false) }
+    var mensajeResultado by remember { mutableStateOf("") }
+    var guardadoExitoso by remember { mutableStateOf(false) }
 
     Column(
         modifier = modifier
@@ -85,18 +97,26 @@ fun ContactoScreen(
 
             OutlinedTextField(
                 value = nombre,
-                onValueChange = { nombre = it },
+                onValueChange = {
+                    nombre = it
+                    mensajeResultado = ""
+                },
                 label = { Text("Nombre completo") },
                 modifier = Modifier.fillMaxWidth(),
-                singleLine = true
+                singleLine = true,
+                enabled = !guardando
             )
 
             OutlinedTextField(
                 value = correo,
-                onValueChange = { correo = it },
+                onValueChange = {
+                    correo = it
+                    mensajeResultado = ""
+                },
                 label = { Text("Correo electrónico") },
                 modifier = Modifier.fillMaxWidth(),
-                singleLine = true
+                singleLine = true,
+                enabled = !guardando
             )
 
             Text(
@@ -120,7 +140,9 @@ fun ContactoScreen(
                         selected = tipoColaboracion == opcion,
                         onClick = {
                             tipoColaboracion = opcion
-                        }
+                            mensajeResultado = ""
+                        },
+                        enabled = !guardando
                     )
 
                     Text(text = opcion)
@@ -129,34 +151,101 @@ fun ContactoScreen(
 
             OutlinedTextField(
                 value = mensaje,
-                onValueChange = { mensaje = it },
+                onValueChange = {
+                    mensaje = it
+                    mensajeResultado = ""
+                },
                 label = { Text("Mensaje") },
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(130.dp),
-                maxLines = 5
+                maxLines = 5,
+                enabled = !guardando
             )
 
+            // BOTÓN GUARDAR
             Button(
                 onClick = {
-                    mostrarMensaje = true
+                    val nombreLimpio = nombre.trim()
+                    val correoLimpio = correo.trim().lowercase()
+                    val mensajeLimpio = mensaje.trim()
+
+                    val errorCorreo =
+                        LoginValidator.validarCorreo(correoLimpio)
+
+                    if (errorCorreo != null) {
+                        guardadoExitoso = false
+                        mensajeResultado = errorCorreo
+                    } else {
+                        guardando = true
+                        mensajeResultado = ""
+
+                        scope.launch {
+                            try {
+                                val solicitud = SolicitudContacto(
+                                    nombre = nombreLimpio,
+                                    correo = correoLimpio,
+                                    tipoColaboracion = tipoColaboracion,
+                                    mensaje = mensajeLimpio,
+                                    usuarioId = usuarioId
+                                )
+
+                                withContext(Dispatchers.IO) {
+                                    DatabaseProvider
+                                        .obtenerDatabase(context)
+                                        .solicitudContactoDao()
+                                        .guardarSolicitud(solicitud)
+                                }
+
+                                // LIMPIAR FORMULARIO
+                                nombre = ""
+                                correo = ""
+                                mensaje = ""
+                                tipoColaboracion = "Donaciones"
+
+                                guardadoExitoso = true
+                                mensajeResultado =
+                                    "Solicitud guardada correctamente."
+
+                            } catch (e: Exception) {
+                                guardadoExitoso = false
+                                mensajeResultado =
+                                    "No se pudo guardar la solicitud."
+                            } finally {
+                                guardando = false
+                            }
+                        }
+                    }
                 },
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = verde
                 ),
                 shape = RoundedCornerShape(12.dp),
-                enabled = nombre.isNotBlank() &&
+                enabled = !guardando &&
+                        nombre.isNotBlank() &&
                         correo.isNotBlank() &&
                         mensaje.isNotBlank()
             ) {
-                Text("Enviar solicitud")
+                if (guardando) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(20.dp),
+                        color = Color.White,
+                        strokeWidth = 2.dp
+                    )
+                } else {
+                    Text("Enviar solicitud")
+                }
             }
 
-            if (mostrarMensaje) {
+            if (mensajeResultado.isNotEmpty()) {
                 Text(
-                    text = "Formulario completado correctamente (demostración).",
-                    color = verde,
+                    text = mensajeResultado,
+                    color = if (guardadoExitoso) {
+                        verde
+                    } else {
+                        MaterialTheme.colorScheme.error
+                    },
                     fontWeight = FontWeight.Bold
                 )
             }

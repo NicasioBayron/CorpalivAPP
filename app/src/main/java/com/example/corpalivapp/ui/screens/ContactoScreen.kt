@@ -17,6 +17,7 @@ import androidx.compose.ui.platform.LocalContext
 
 import com.example.corpalivapp.data.DatabaseProvider
 import com.example.corpalivapp.data.SolicitudContacto
+import com.example.corpalivapp.ui.theme.VerdeCorpaliv
 import com.example.corpalivapp.viewmodel.validation.LoginValidator
 
 import kotlinx.coroutines.Dispatchers
@@ -27,35 +28,18 @@ import kotlinx.coroutines.withContext
 fun ContactoScreen(
     modifier: Modifier = Modifier,
     usuarioId: Int? = null,
-    modoOscuro: Boolean = false,
     onMenuClick: () -> Unit = {}
 ) {
-    val verde = Color(0xFF286657)
+    val verde = VerdeCorpaliv
 
     // Colores modo claro y oscuro
-    val fondo = if (modoOscuro) {
-        Color(0xFF202820)
-    } else {
-        Color(0xFFFAF8F5)
-    }
+    val fondo = MaterialTheme.colorScheme.background
 
-    val colorTexto = if (modoOscuro) {
-        Color.White
-    } else {
-        Color(0xFF35443D)
-    }
+    val colorTexto = MaterialTheme.colorScheme.onBackground
 
-    val colorTitulo = if (modoOscuro) {
-        Color(0xFFB5E2C8)
-    } else {
-        verde
-    }
+    val colorTitulo = MaterialTheme.colorScheme.primary
 
-    val colorCampo = if (modoOscuro) {
-        Color(0xFF304037)
-    } else {
-        Color.White
-    }
+    val colorCampo = MaterialTheme.colorScheme.surfaceContainer
 
     val coloresCampo = OutlinedTextFieldDefaults.colors(
         focusedTextColor = colorTexto,
@@ -63,11 +47,7 @@ fun ContactoScreen(
         focusedContainerColor = colorCampo,
         unfocusedContainerColor = colorCampo,
         focusedBorderColor = colorTitulo,
-        unfocusedBorderColor = if (modoOscuro) {
-            Color(0xFF91A79A)
-        } else {
-            Color.Gray
-        },
+        unfocusedBorderColor = MaterialTheme.colorScheme.outline,
         focusedLabelColor = colorTitulo,
         unfocusedLabelColor = colorTexto,
         cursorColor = colorTitulo

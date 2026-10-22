@@ -13,52 +13,22 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.corpalivapp.ui.theme.VerdeCorpaliv
 
 @Composable
 fun NosotrosScreen(
     modifier: Modifier = Modifier,
-    modoOscuro: Boolean = false,
     onMenuClick: () -> Unit = {}
 ) {
 
-    val verde = Color(0xFF286657)
+   val verde = VerdeCorpaliv
+   val fondo = MaterialTheme.colorScheme.background
+   val colorTexto = MaterialTheme.colorScheme.onBackground
+   val colorTitulo = MaterialTheme.colorScheme.primary
 
-    // Colores segun el modo
-    val fondo = if (modoOscuro) {
-        Color(0xFF202820)
-    } else {
-        Color(0xFFFAF8F5)
-    }
-
-    val colorTexto = if (modoOscuro) {
-        Color.White
-    } else {
-        Color(0xFF35443D)
-    }
-
-    val colorTitulo = if (modoOscuro) {
-        Color(0xFFB5E2C8)
-    } else {
-        verde
-    }
-
-    val fondoTarjetaVerde = if (modoOscuro) {
-        Color(0xFF30483C)
-    } else {
-        Color(0xFFE8EFE9)
-    }
-
-    val fondoTarjetaBeige = if (modoOscuro) {
-        Color(0xFF4A3B32)
-    } else {
-        Color(0xFFF4E8D9)
-    }
-
-    val colorTituloBeige = if (modoOscuro) {
-        Color(0xFFFFD3A8)
-    } else {
-        verde
-    }
+    val fondoTarjetaVerde = MaterialTheme.colorScheme.surfaceVariant
+    val fondoTarjetaBeige = MaterialTheme.colorScheme.secondaryContainer
+    val colorTituloBeige = MaterialTheme.colorScheme.secondary
 
     Column(
         modifier = modifier

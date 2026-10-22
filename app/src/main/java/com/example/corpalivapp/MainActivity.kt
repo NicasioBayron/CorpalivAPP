@@ -28,11 +28,11 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            CorpalivAppTheme() {
                 //Texto de prueba
-                //Me Falta aportes y ajustes
-                App() // Llamada limpia a la vista
-            }
+                //Faltan - Notificaciones - editar foto de perfil/acceso a archivos - camara para validar la donacion/aporte
+                //Mover modo oscuro y colores a carpeta theme
+            App() // Llamada limpia a la vista
         }
     }
 }
+

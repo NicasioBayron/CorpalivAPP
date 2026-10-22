@@ -16,34 +16,23 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.shape.RoundedCornerShape
 
 import com.example.corpalivapp.ui.components.ProgramaCard
+import com.example.corpalivapp.ui.theme.VerdeCorpaliv
 import com.example.corpalivapp.ui.theme.CorpalivAppTheme
+import com.example.corpalivapp.ui.theme.TextoSecundarioSobreVerde
 
 @Composable
 fun HomeScreen(
     modifier: Modifier = Modifier,
-    modoOscuro: Boolean = false,
     onMenuClick: () -> Unit = {},
     onColaborarClick: () -> Unit = {}
 ) {
-    val verdeCorpaliv = Color(0xFF286657)
+    val verdeCorpaliv = VerdeCorpaliv
 
-    val fondo = if (modoOscuro) {
-        Color(0xFF202820)
-    } else {
-        Color(0xFFFAF8F5)
-    }
+    val fondo = MaterialTheme.colorScheme.background
 
-    val colorTexto = if (modoOscuro) {
-        Color.White
-    } else {
-        Color(0xFF35443D)
-    }
+    val colorTexto = MaterialTheme.colorScheme.onBackground
 
-    val colorTitulo = if (modoOscuro) {
-        Color(0xFFB5E2C8)
-    } else {
-        verdeCorpaliv
-    }
+    val colorTitulo = MaterialTheme.colorScheme.primary
 
     Column(
         modifier = modifier
@@ -98,7 +87,7 @@ fun HomeScreen(
 
             Text(
                 text = "Conoce nuestra misión y descubre cómo puedes ser parte del cambio.",
-                color = Color(0xFFE4F2EC),
+                color = TextoSecundarioSobreVerde,
                 fontSize = 15.sp,
                 lineHeight = 23.sp
             )
@@ -133,13 +122,11 @@ fun HomeScreen(
             ProgramaCard(
                 titulo = "Escuela Jan Van Dijk",
                 descripcion = "Educación, formación e inclusión social.",
-                modoOscuro = modoOscuro
             )
 
             ProgramaCard(
                 titulo = "Alba Lab",
                 descripcion = "Formación e inclusión sociolaboral.",
-                modoOscuro = modoOscuro
             )
 
             Button(

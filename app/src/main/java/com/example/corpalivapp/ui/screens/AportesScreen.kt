@@ -14,6 +14,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -23,53 +24,23 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.corpalivapp.ui.theme.VerdeCorpaliv
 
 @Composable
 fun AportesScreen(
     modifier: Modifier = Modifier,
-    modoOscuro: Boolean = false,
     onMenuClick: () -> Unit = {},
     onContactoClick: () -> Unit = {}
 ) {
 
-    val verdeCorpaliv = Color(0xFF286657)
+    val verde = VerdeCorpaliv
+    val fondo = MaterialTheme.colorScheme.background
+    val colorTexto = MaterialTheme.colorScheme.onBackground
+    val colorTitulo = MaterialTheme.colorScheme.primary
 
-    // Colores segun el modo
-    val fondo = if (modoOscuro) {
-        Color(0xFF202820)
-    } else {
-        Color(0xFFFAF8F5)
-    }
-
-    val colorTexto = if (modoOscuro) {
-        Color.White
-    } else {
-        Color(0xFF35443D)
-    }
-
-    val colorTitulo = if (modoOscuro) {
-        Color(0xFFB5E2C8)
-    } else {
-        verdeCorpaliv
-    }
-
-    val fondoVerde = if (modoOscuro) {
-        Color(0xFF30483C)
-    } else {
-        Color(0xFFE8EFE9)
-    }
-
-    val fondoBeige = if (modoOscuro) {
-        Color(0xFF4A3B32)
-    } else {
-        Color(0xFFF4E8D9)
-    }
-
-    val colorVoluntariado = if (modoOscuro) {
-        Color(0xFFFFD3A8)
-    } else {
-        Color(0xFF935A30)
-    }
+    val fondoVerde = MaterialTheme.colorScheme.surfaceVariant
+    val fondoBeige = MaterialTheme.colorScheme.secondaryContainer
+    val colorVoluntariado = MaterialTheme.colorScheme.secondary
 
     Column(
         modifier = modifier
@@ -82,7 +53,7 @@ fun AportesScreen(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .background(verdeCorpaliv)
+                .background(verde)
                 .padding(16.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
@@ -199,7 +170,7 @@ fun AportesScreen(
                 onClick = onContactoClick,
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = verdeCorpaliv,
+                    containerColor = verde,
                     contentColor = Color.White
                 ),
                 shape = RoundedCornerShape(12.dp)

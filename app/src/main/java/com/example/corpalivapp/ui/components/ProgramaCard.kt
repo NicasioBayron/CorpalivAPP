@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -22,8 +23,7 @@ import androidx.compose.ui.unit.sp
 fun ProgramaCard(
     titulo: String,
     descripcion: String,
-    modifier: Modifier = Modifier,
-    modoOscuro: Boolean = false
+    modifier: Modifier = Modifier
 ) {
 
     // Identificamos el programa
@@ -33,56 +33,27 @@ fun ProgramaCard(
     )
 
     // COLOR DE FONDO
-    val colorFondo = if (modoOscuro) {
-        if (esEscuela) {
-            Color(0xFF30483C)
-        } else {
-            Color(0xFF4A3B32)
-        }
+    val colores = MaterialTheme.colorScheme
+
+    val colorFondo = if (esEscuela) {
+        colores.surfaceVariant
     } else {
-        if (esEscuela) {
-            Color(0xFFE8EFE9)
-        } else {
-            Color(0xFFF4E8D9)
-        }
+        colores.secondaryContainer
     }
 
-    // COLOR DEL TÍTULO
-    val colorPrincipal = if (modoOscuro) {
-        if (esEscuela) {
-            Color(0xFFB5E2C8)
-        } else {
-            Color(0xFFFFD3A8)
-        }
+    val colorPrincipal = if (esEscuela) {
+        colores.primary
     } else {
-        if (esEscuela) {
-            Color(0xFF286657)
-        } else {
-            Color(0xFF935A30)
-        }
+        colores.secondary
     }
 
-    // COLOR DEL ICONO
-    val colorIcono = if (modoOscuro) {
-        if (esEscuela) {
-            Color(0xFF466453)
-        } else {
-            Color(0xFF665043)
-        }
+    val colorIcono = if (esEscuela) {
+        colores.primaryContainer
     } else {
-        if (esEscuela) {
-            Color(0xFFD0E2D6)
-        } else {
-            Color(0xFFEBD5BC)
-        }
+        colores.tertiaryContainer
     }
 
-    // COLOR DE LA DESCRIPCIÓN
-    val colorDescripcion = if (modoOscuro) {
-        Color(0xFFE5EAE5)
-    } else {
-        Color(0xFF48534D)
-    }
+    val colorDescripcion = colores.onSurfaceVariant
 
     val simbolo = if (esEscuela) "🎓" else "💼"
 

@@ -44,6 +44,12 @@ object DatabaseProvider {
         }
     }
 
+    // Conserva las cuentas existentes y agrega la referencia a su foto privada.
+    private val MIGRATION_3_4 = object : Migration(3, 4) {
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL("ALTER TABLE usuarios ADD COLUMN fotoPerfil TEXT")
+        }
+    }
     // obtener la base de datos
     fun obtenerDatabase(context: Context): AppDatabase {
 
@@ -56,7 +62,8 @@ object DatabaseProvider {
             )
                 .addMigrations(
                     MIGRATION_1_2,
-                    MIGRATION_2_3
+                    MIGRATION_2_3,
+                    MIGRATION_3_4
                 )
                 .build()
                 .also {

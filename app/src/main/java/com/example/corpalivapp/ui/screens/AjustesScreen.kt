@@ -1,5 +1,9 @@
 package com.example.corpalivapp.ui.screens
 
+import android.content.pm.PackageManager
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -11,9 +15,19 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat
+import androidx.core.content.ContextCompat.checkSelfPermission
+import com.example.corpalivapp.notifications.Notificaciones
+import com.example.corpalivapp.ui.theme.TextoSecundarioSobreVerde
+import com.example.corpalivapp.ui.theme.TextoSobreVerde
+import com.example.corpalivapp.ui.theme.VerdeCorpaliv
+import java.util.jar.Manifest
+import kotlin.contracts.contract
+
 
 @Composable
 fun AjustesScreen(
@@ -24,24 +38,31 @@ fun AjustesScreen(
     onPerfilClick: () -> Unit = {},
     onSolicitudesClick: () -> Unit = {}
 ) {
-    val verde = Color(0xFF286657)
+    val verde = VerdeCorpaliv
+    val fondo = MaterialTheme.colorScheme.background
+    val colorTexto = MaterialTheme.colorScheme.onBackground
+    val colorTarjeta = MaterialTheme.colorScheme.surfaceVariant
 
-    val fondo = if (modoOscuro) {
-        Color(0xFF202820)
-    } else {
-        Color(0xFFFAF8F5)
+    val context = LocalContext.current
+    var mensajeNotificacion by remember {
+        mutableStateOf("")
     }
-
-    val colorTexto = if (modoOscuro) {
-        Color.White
-    } else {
-        Color(0xFF35443D)
+    val enviarPrueba: () -> Unit = {
+        val enviada = Notificaciones.enviarPrueba(context)
+        mensajeNotificacion = if (enviada){
+            "Notificacion enviada, revisa tu bandeja"
+        } else {
+            "Notificaciones no permitidas, revisa los ajustes, ojala poder dormir"
+        }
     }
-
-    val colorTarjeta = if (modoOscuro) {
-        Color(0xFF364238)
-    } else {
-        Color(0xFFE8EFE9)
+    val solicitarPermisoNotificaciones = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.RequestPermission()
+    ) { permitido ->
+        if (permitido) {
+            enviarPrueba()
+        } else {
+            mensajeNotificacion = "Nose concedio permiso, concede pe"
+        }
     }
 
     Column(
@@ -62,7 +83,7 @@ fun AjustesScreen(
         ) {
             Text(
                 text = "Ajustes",
-                color = Color.White,
+                color = TextoSobreVerde,
                 fontSize = 20.sp,
                 fontWeight = FontWeight.Bold
             )
@@ -70,7 +91,7 @@ fun AjustesScreen(
             TextButton(onClick = onMenuClick) {
                 Text(
                     text = "☰",
-                    color = Color.White,
+                    color = TextoSobreVerde,
                     fontSize = 26.sp
                 )
             }
@@ -86,7 +107,7 @@ fun AjustesScreen(
                 text = "Configuración",
                 fontSize = 26.sp,
                 fontWeight = FontWeight.Bold,
-                color = if (modoOscuro) Color.White else verde
+                color = MaterialTheme.colorScheme.primary
             )
 
             Text(
@@ -131,6 +152,42 @@ fun AjustesScreen(
                     )
                 }
             }
+            Text(
+                text = "Notificaciones",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                color = colorTexto
+            )
+            Button(
+                onClick = {
+                    Notificaciones.crearCanal(context)
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU){
+                        val permiso = ContextCompat.checkSelfPermission(
+                            context,
+                            android.Manifest.permission.POST_NOTIFICATIONS
+                        )
+                        if (permiso == PackageManager.PERMISSION_GRANTED){
+                            enviarPrueba()
+                        } else {
+                            solicitarPermisoNotificaciones.launch(
+                                android.Manifest.permission.POST_NOTIFICATIONS
+                            )
+                        }
+                    } else {
+                        enviarPrueba()
+                    }
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Enviar notificaciones de prueba")
+            }
+
+            if (mensajeNotificacion.isNotEmpty()){
+                Text(
+                    text = mensajeNotificacion,
+                    color = colorTexto
+                )
+            }
 
             // ACCESOS RÁPIDOS
             Text(
@@ -166,11 +223,7 @@ fun AjustesScreen(
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(
-                    containerColor = if (modoOscuro) {
-                        Color(0xFF364238)
-                    } else {
-                        Color(0xFFF4E8D9)
-                    }
+                    containerColor = MaterialTheme.colorScheme.secondaryContainer
                 ),
                 shape = RoundedCornerShape(16.dp)
             ) {

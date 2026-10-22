@@ -23,6 +23,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.corpalivapp.data.DatabaseProvider
 import com.example.corpalivapp.data.PasswordUtils
 import com.example.corpalivapp.data.Usuario
+import com.example.corpalivapp.ui.theme.VerdeCorpaliv
 import com.example.corpalivapp.viewmodel.LoginUiState
 import com.example.corpalivapp.viewmodel.LoginViewModel
 import com.example.corpalivapp.viewmodel.validation.LoginValidator
@@ -36,7 +37,6 @@ import java.util.Locale
 fun LoginScreen(
     modifier: Modifier = Modifier,
     loginViewModel: LoginViewModel = viewModel(),
-    modoOscuro: Boolean = false,
     onMenuClick: () -> Unit = {},
     onLoginExitoso: (Int) -> Unit = {}
 ) {
@@ -50,8 +50,8 @@ fun LoginScreen(
 
     var mostrarRegistro by remember { mutableStateOf(false) }
 
-    val verde = Color(0xFF286657)
-    val fondo = if (modoOscuro) Color(0xFF202820) else Color(0xFFFAF8F5)
+    val verde = VerdeCorpaliv
+    val fondo = MaterialTheme.colorScheme.background
 
     Column(
         modifier = modifier
@@ -85,7 +85,6 @@ fun LoginScreen(
 
         if (mostrarRegistro) {
             RegistroContenido(
-                modoOscuro = modoOscuro,
                 onVolverClick = {
                     mostrarRegistro = false
                 }
@@ -93,7 +92,6 @@ fun LoginScreen(
         } else {
             LoginContenido(
                 estado = estado,
-                modoOscuro = modoOscuro,
                 onCorreoChange = loginViewModel::actualizarCorreo,
                 onClaveChange = loginViewModel::actualizarClave,
                 onValidarClick = loginViewModel::validarFormulario,
@@ -113,12 +111,11 @@ fun LoginContenido(
     onValidarClick: () -> Unit,
     onRegistroClick: () -> Unit,
     modifier: Modifier = Modifier,
-    modoOscuro: Boolean = false
 ) {
-    val verde = Color(0xFF286657)
-    val colorTexto = if (modoOscuro) Color.White else Color(0xFF35443D)
-    val colorTitulo = if (modoOscuro) Color(0xFFB5E2C8) else verde
-    val fondoCampo = if (modoOscuro) Color(0xFF304037) else Color.White
+    val verde = VerdeCorpaliv
+    val colorTexto = MaterialTheme.colorScheme.onBackground
+    val colorTitulo = MaterialTheme.colorScheme.primary
+    val fondoCampo = MaterialTheme.colorScheme.surfaceContainer
 
     val coloresCampo = OutlinedTextFieldDefaults.colors(
         focusedTextColor = colorTexto,
@@ -126,7 +123,7 @@ fun LoginContenido(
         focusedContainerColor = fondoCampo,
         unfocusedContainerColor = fondoCampo,
         focusedBorderColor = colorTitulo,
-        unfocusedBorderColor = if (modoOscuro) Color.LightGray else Color.Gray,
+        unfocusedBorderColor = MaterialTheme.colorScheme.outline,
         focusedLabelColor = colorTitulo,
         unfocusedLabelColor = colorTexto,
         cursorColor = colorTitulo
@@ -221,12 +218,11 @@ fun LoginContenido(
 @Composable
 fun RegistroContenido(
     onVolverClick: () -> Unit,
-    modoOscuro: Boolean = false
 ) {
-    val verde = Color(0xFF286657)
-    val colorTexto = if (modoOscuro) Color.White else Color(0xFF35443D)
-    val colorTitulo = if (modoOscuro) Color(0xFFB5E2C8) else verde
-    val fondoCampo = if (modoOscuro) Color(0xFF304037) else Color.White
+    val verde = VerdeCorpaliv
+    val colorTexto = MaterialTheme.colorScheme.onBackground
+    val colorTitulo = MaterialTheme.colorScheme.primary
+    val fondoCampo = MaterialTheme.colorScheme.surfaceContainer
 
     val coloresCampo = OutlinedTextFieldDefaults.colors(
         focusedTextColor = colorTexto,
@@ -234,7 +230,7 @@ fun RegistroContenido(
         focusedContainerColor = fondoCampo,
         unfocusedContainerColor = fondoCampo,
         focusedBorderColor = colorTitulo,
-        unfocusedBorderColor = if (modoOscuro) Color.LightGray else Color.Gray,
+        unfocusedBorderColor = MaterialTheme.colorScheme.outline,
         focusedLabelColor = colorTitulo,
         unfocusedLabelColor = colorTexto,
         cursorColor = colorTitulo

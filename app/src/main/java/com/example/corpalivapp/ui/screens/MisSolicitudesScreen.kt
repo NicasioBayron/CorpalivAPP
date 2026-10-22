@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.sp
 
 import com.example.corpalivapp.data.DatabaseProvider
 import com.example.corpalivapp.data.SolicitudContacto
+import com.example.corpalivapp.ui.theme.VerdeCorpaliv
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -29,47 +30,22 @@ import java.util.Locale
 fun MisSolicitudesScreen(
     usuarioId: Int,
     modifier: Modifier = Modifier,
-    modoOscuro: Boolean = false,
     onMenuClick: () -> Unit = {}
 ) {
-    val verde = Color(0xFF286657)
+    val verde = VerdeCorpaliv
 
     // COLORES SEGÚN EL MODO
-    val fondo = if (modoOscuro) {
-        Color(0xFF202820)
-    } else {
-        Color(0xFFFAF8F5)
-    }
+    val fondo = MaterialTheme.colorScheme.background
 
-    val colorTexto = if (modoOscuro) {
-        Color.White
-    } else {
-        Color(0xFF35443D)
-    }
+    val colorTexto = MaterialTheme.colorScheme.onBackground
 
-    val colorTitulo = if (modoOscuro) {
-        Color(0xFFB5E2C8)
-    } else {
-        verde
-    }
+    val colorTitulo = MaterialTheme.colorScheme.primary
 
-    val fondoTarjeta = if (modoOscuro) {
-        Color(0xFF30483C)
-    } else {
-        Color.White
-    }
+    val fondoTarjeta = MaterialTheme.colorScheme.surfaceVariant
 
-    val colorSecundario = if (modoOscuro) {
-        Color(0xFFCBD5CD)
-    } else {
-        Color.Gray
-    }
+    val colorSecundario = MaterialTheme.colorScheme.onSurfaceVariant
 
-    val colorDivisor = if (modoOscuro) {
-        Color(0xFF64776A)
-    } else {
-        Color(0xFFDDDDDD)
-    }
+    val colorDivisor = MaterialTheme.colorScheme.outlineVariant
 
     val context = LocalContext.current
 

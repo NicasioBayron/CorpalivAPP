@@ -18,5 +18,7 @@ data class Usuario(
 
     val claveHash: String,
 
-    val claveSalt: String
+    val claveSalt: String,
+
+    val fotoPerfil: String? = null
 )

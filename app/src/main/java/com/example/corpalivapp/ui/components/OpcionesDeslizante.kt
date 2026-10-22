@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationDrawerItem
@@ -18,44 +19,23 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.example.corpalivapp.ui.theme.VerdeCorpaliv
 import kotlinx.coroutines.launch
 
 @Composable
 fun OpcionesDeslizante(
     pantallaActual: String,
     onPantallaSeleccionada: (String) -> Unit,
-    modoOscuro: Boolean = false,
     contenido: @Composable (abrirMenu: () -> Unit) -> Unit
 ) {
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
-    val verdeCorpaliv = Color(0xFF286657)
-
-    // Colores segun el modo
-    val fondoMenu = if (modoOscuro) {
-        Color(0xFF202820)
-    } else {
-        Color(0xFFFAF8F5)
-    }
-
-    val colorTexto = if (modoOscuro) {
-        Color.White
-    } else {
-        Color(0xFF35443D)
-    }
-
-    val fondoSeleccionado = if (modoOscuro) {
-        Color(0xFF30483C)
-    } else {
-        Color(0xFFE8EFE9)
-    }
-
-    val textoSeleccionado = if (modoOscuro) {
-        Color(0xFFB5E2C8)
-    } else {
-        verdeCorpaliv
-    }
+    val verdeCorpaliv = VerdeCorpaliv
+    val fondoMenu = MaterialTheme.colorScheme.background
+    val colorTexto = MaterialTheme.colorScheme.onBackground
+    val fondoSeleccionado = MaterialTheme.colorScheme.surfaceVariant
+    val textoSeleccionado = MaterialTheme.colorScheme.primary
 
     val opciones = listOf(
         "Inicio",

@@ -1,5 +1,18 @@
 package com.example.corpalivapp.ui.screens
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.layout.ContentScale
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.corpalivapp.viewmodel.PerfilViewModel
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -8,86 +21,57 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
+
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
-import com.example.corpalivapp.data.DatabaseProvider
-import com.example.corpalivapp.data.Usuario
 
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
+
+import com.example.corpalivapp.ui.theme.VerdeCorpaliv
+
+
+
 
 @Composable
 fun UsuarioScreen(
     usuarioId: Int,
     modifier: Modifier = Modifier,
-    modoOscuro: Boolean = false,
     onMenuClick: () -> Unit = {},
     onInicioClick: () -> Unit = {},
-    onCerrarSesion: () -> Unit = {}
+    onCerrarSesion: () -> Unit = {},
+    perfilViewModel: PerfilViewModel = viewModel()
 ) {
-    val verde = Color(0xFF286657)
+    val verde = VerdeCorpaliv
 
     // Colores segun modo
-    val fondo = if (modoOscuro) {
-        Color(0xFF202820)
-    } else {
-        Color(0xFFFAF8F5)
-    }
+    val fondo = MaterialTheme.colorScheme.background
 
-    val colorTexto = if (modoOscuro) {
-        Color.White
-    } else {
-        Color(0xFF35443D)
-    }
+    val colorTexto = MaterialTheme.colorScheme.onBackground
 
-    val colorTitulo = if (modoOscuro) {
-        Color(0xFFB5E2C8)
-    } else {
-        verde
-    }
+    val colorTitulo = MaterialTheme.colorScheme.primary
 
-    val fondoTarjeta = if (modoOscuro) {
-        Color(0xFF30483C)
-    } else {
-        Color(0xFFE8EFE9)
-    }
+    val fondoTarjeta = MaterialTheme.colorScheme.surfaceVariant
 
-    val context = LocalContext.current
+    val estado by perfilViewModel.uiState.collectAsStateWithLifecycle()
+    val usuario = estado.usuario
+    val cargando = estado.cargando
 
-    var usuario by remember(usuarioId) {
-        mutableStateOf<Usuario?>(null)
-    }
-
-    var cargando by remember(usuarioId) {
-        mutableStateOf(true)
-    }
-
-    // BUSCAR LOS DATOS DEL USUARIO EN ROOM
     LaunchedEffect(usuarioId) {
-        cargando = true
-
-        usuario = try {
-            withContext(Dispatchers.IO) {
-                val dao = DatabaseProvider
-                    .obtenerDatabase(context)
-                    .usuarioDao()
-
-                dao.buscarPorId(usuarioId)
-            }
-        } catch (e: Exception) {
-            null
-        }
-
-        cargando = false
+        perfilViewModel.cargar(usuarioId)
     }
 
+    val selectorFoto = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia()
+    ) { uri ->
+        // Cancelar el selector no modifica la foto actual.
+        if (uri != null) perfilViewModel.cambiarFoto(usuarioId, uri)
+    }
     Column(
         modifier = modifier
             .fillMaxSize()
             .background(fondo)
+            .verticalScroll(rememberScrollState())
     ) {
 
         // Encabezado
@@ -133,6 +117,56 @@ fun UsuarioScreen(
                 color = colorTexto
             )
 
+            if (usuario != null && !cargando) {
+                Column(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    val foto = estado.foto
+                    if (foto != null) {
+                        Image(
+                            bitmap = foto.asImageBitmap(),
+                            contentDescription = "Foto de perfil",
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier.size(112.dp).clip(CircleShape)
+                        )
+                    } else {
+                        Surface(
+                            modifier = Modifier.size(112.dp),
+                            shape = CircleShape,
+                            color = MaterialTheme.colorScheme.surfaceVariant
+                        ) {
+                            Box(contentAlignment = Alignment.Center) {
+                                Text(
+                                    text = usuario.nombre.take(1).uppercase(),
+                                    style = MaterialTheme.typography.headlineLarge,
+                                    color = colorTitulo
+                                )
+                            }
+                        }
+                    }
+
+                    OutlinedButton(
+                        enabled = !estado.guardandoFoto,
+                        onClick = {
+                            selectorFoto.launch(
+                                PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+                            )
+                        }
+                    ) {
+                        Text(if (estado.guardandoFoto) "Guardando foto…" else "Cambiar foto")
+                    }
+                    if (estado.guardandoFoto) CircularProgressIndicator()
+                }
+            }
+
+            estado.mensaje?.let { mensaje ->
+                Text(
+                    text = mensaje,
+                    color = if (estado.esError) MaterialTheme.colorScheme.error else colorTexto
+                )
+            }
             if (cargando) {
                 CircularProgressIndicator(
                     color = colorTitulo
@@ -168,11 +202,7 @@ fun UsuarioScreen(
                         )
 
                         HorizontalDivider(
-                            color = if (modoOscuro) {
-                                Color(0xFF64776A)
-                            } else {
-                                Color(0xFFCED8D0)
-                            }
+                            color = MaterialTheme.colorScheme.outlineVariant
                         )
 
                         Text(

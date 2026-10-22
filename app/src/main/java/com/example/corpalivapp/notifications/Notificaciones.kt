@@ -33,7 +33,15 @@ object Notificaciones{
         administrador.createNotificationChannel(canal)
     }
 
-    fun enviarPrueba(context: Context): Boolean{
+    fun enviarPrueba(context: Context): Boolean = enviar(
+        context, "CORPALIV", "Este es un recordatorio de prueba"
+    )
+
+    fun enviarAporteRegistrado(context: Context, id: Long): Boolean = enviar(
+        context, "Aporte de prueba registrado", "Tu aporte #$id quedó guardado. No se realizó ningún cobro."
+    )
+
+    private fun enviar(context: Context, titulo: String, texto: String): Boolean {
         crearCanal(context)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU){
             val permiso = ContextCompat.checkSelfPermission(
@@ -70,8 +78,8 @@ object Notificaciones{
         )
         val notificacion = NotificationCompat.Builder(context, CANAL_ID)
             .setSmallIcon(R.drawable.ic_notification)
-            .setContentTitle("CORPALIV")
-            .setContentText("Este es un recordatorio de prueba")
+            .setContentTitle(titulo)
+            .setContentText(texto)
             .setContentIntent(accion)
             .setAutoCancel(true)
             .build()

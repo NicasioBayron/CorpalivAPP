@@ -3,6 +3,7 @@ package com.example.corpalivapp.viewmodel
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.corpalivapp.notifications.Notificaciones
 import com.example.corpalivapp.data.Donacion
 import com.example.corpalivapp.data.DonacionRepository
 import kotlinx.coroutines.CancellationException
@@ -22,30 +23,35 @@ class DonacionViewModel(application: Application): AndroidViewModel(application)
     val uiState = _uiState.asStateFlow()
 
     fun actualizarNombre(valor: String){
+        if (_uiState.value.guardando) return
         _uiState.update {
             it.copy(nombre = valor, errorNombre = null, mensaje = null)
         }
     }
 
     fun actualizarCorreo(valor: String){
+        if (_uiState.value.guardando) return
         _uiState.update {
             it.copy(correo = valor, errorCorreo = null, mensaje = null)
         }
     }
 
     fun actualizarMonto(valor: String) {
+        if (_uiState.value.guardando) return
         _uiState.update {
             it.copy(monto = valor, errorMonto = null, mensaje = null)
         }
     }
 
     fun actualizarFecha(valor: LocalDate) {
+        if (_uiState.value.guardando) return
         _uiState.update {
             it.copy(fecha = valor, errorFecha = null, mensaje = null)
         }
     }
 
     fun actualizarCondiciones(valor: Boolean) {
+        if (_uiState.value.guardando) return
         _uiState.update {
             it.copy(
                 aceptaCondiciones = valor,
@@ -56,6 +62,7 @@ class DonacionViewModel(application: Application): AndroidViewModel(application)
     }
 
     fun actualizarSeguimiento(valor: Boolean) {
+        if (_uiState.value.guardando) return
         _uiState.update {
             it.copy(recibirSeguimiento = valor, mensaje = null)
         }
@@ -111,7 +118,7 @@ class DonacionViewModel(application: Application): AndroidViewModel(application)
 
         if (usuarioId == null) {
             _uiState.update {
-                it.copy(mensaje = "Inicia sesión para registrar un aporte.")
+                it.copy(mensaje = "Inicia sesión para registrar un aporte.", esError = true)
             }
             return
         }
@@ -128,7 +135,7 @@ class DonacionViewModel(application: Application): AndroidViewModel(application)
         ) {
             _uiState.update {
                 it.copy(
-                    mensaje = "Debes tomar y confirmar una foto del documento de prueba."
+                    errorFoto = "Debes tomar y confirmar una foto del documento de prueba."
                 )
             }
             return
@@ -151,22 +158,28 @@ class DonacionViewModel(application: Application): AndroidViewModel(application)
         )
 
         _uiState.update {
-            it.copy(guardando = true, mensaje = null)
+            it.copy(guardando = true, mensaje = null, esError = false)
         }
 
         viewModelScope.launch {
             try {
                 val id = repositorio.registrar(donacion)
 
+                // Un aviso bloqueado nunca convierte un guardado correcto en un fallo.
+                runCatching {
+                    Notificaciones.enviarAporteRegistrado(getApplication(), id)
+                }
+
                 _uiState.value = DonacionUiState(
-                    mensaje = "Aporte de id:  #$id registrado."
+                    mensaje = "Aporte de prueba #$id registrado. No se realizó ningún cobro."
                 )
             } catch (error: CancellationException) {
                 throw error
             } catch (error: Exception) {
                 _uiState.update {
                     it.copy(
-                        mensaje = "No se pudo guardar el aporte. Intenta nuevamente."
+                        mensaje = "No se pudo guardar el aporte. Intenta nuevamente.",
+                        esError = true
                     )
                 }
             } finally {
@@ -182,6 +195,7 @@ class DonacionViewModel(application: Application): AndroidViewModel(application)
         _uiState.update {
             it.copy(
                 fotoComprobante = ruta,
+                errorFoto = null,
                 mensaje = null
             )
         }

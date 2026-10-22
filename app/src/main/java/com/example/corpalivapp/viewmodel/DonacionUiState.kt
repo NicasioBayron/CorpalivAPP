@@ -20,5 +20,7 @@ data class DonacionUiState(
     val busquedaComuna: String = "",
     val comuna: String = "",
     val errorComuna: String? = null,
+    val errorFoto: String? = null,
+    val esError: Boolean = false,
     val mensaje: String? = null
 )

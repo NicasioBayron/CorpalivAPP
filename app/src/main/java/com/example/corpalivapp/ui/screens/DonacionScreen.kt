@@ -17,6 +17,8 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.corpalivapp.ui.components.IconoErrorCampo
+import com.example.corpalivapp.ui.components.MensajeFormulario
 import com.example.corpalivapp.viewmodel.DonacionViewModel
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -94,6 +96,7 @@ fun DonacionScreen(
             label = { Text("Nombre completo") },
             singleLine = true,
             isError = estado.errorNombre != null,
+            trailingIcon = { IconoErrorCampo(estado.errorNombre) },
             supportingText = {
                 estado.errorNombre?.let { Text(it) }
             },
@@ -110,6 +113,7 @@ fun DonacionScreen(
                 keyboardType = KeyboardType.Email
             ),
             isError = estado.errorCorreo != null,
+            trailingIcon = { IconoErrorCampo(estado.errorCorreo) },
             supportingText = {
                 estado.errorCorreo?.let { Text(it) }
             },
@@ -139,6 +143,7 @@ fun DonacionScreen(
             enabled = !estado.guardando,
             modifier = Modifier.fillMaxWidth(),
             isError = estado.errorComuna != null,
+            trailingIcon = { IconoErrorCampo(estado.errorComuna) },
         )
 
         AnimatedVisibility(
@@ -207,6 +212,7 @@ fun DonacionScreen(
                 keyboardType = KeyboardType.Number
             ),
             isError = estado.errorMonto != null,
+            trailingIcon = { IconoErrorCampo(estado.errorMonto) },
             supportingText = {
                 estado.errorMonto?.let { Text(it) }
             },
@@ -239,12 +245,7 @@ fun DonacionScreen(
             Text(fechaTexto)
         }
 
-        estado.errorFecha?.let {
-            Text(
-                text = it,
-                color = MaterialTheme.colorScheme.error
-            )
-        }
+        MensajeFormulario(estado.errorFecha, esError = true)
 
         Row(
             verticalAlignment = Alignment.CenterVertically
@@ -262,12 +263,7 @@ fun DonacionScreen(
             )
         }
 
-        estado.errorCondiciones?.let {
-            Text(
-                text = it,
-                color = MaterialTheme.colorScheme.error
-            )
-        }
+        MensajeFormulario(estado.errorCondiciones, esError = true)
 
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -292,7 +288,7 @@ fun DonacionScreen(
         )
 
         Text(
-            text = "Adjunta una fotografia de tu cedula de identidad para confirmar tu identidad"
+            text = "Adjunta una foto de una hoja o documento ficticio. La verificación de identidad es simulada."
         )
 
         OutlinedButton(
@@ -344,9 +340,11 @@ fun DonacionScreen(
 
         if (estado.fotoComprobante != null) {
             Text(
-                text = "Documento adjunto — verificación lista."
+                text = "Documento adjunto — verificación simulada."
             )
         }
+
+        MensajeFormulario(estado.errorFoto, esError = true)
 
         mensajeCamara?.let {
             Text(
@@ -362,17 +360,20 @@ fun DonacionScreen(
             enabled = !estado.guardando,
             modifier = Modifier.fillMaxWidth()
         ) {
+            if (estado.guardando) {
+                CircularProgressIndicator(modifier = Modifier.size(20.dp),
+                    color = MaterialTheme.colorScheme.onPrimary, strokeWidth = 2.dp)
+                Spacer(Modifier.width(8.dp))
+            }
             Text(
                 if (estado.guardando) {
                     "Guardando..."
                 } else {
-                    "Registrar aporte"
+                    "Registrar aporte de prueba"
                 }
             )
         }
 
-        estado.mensaje?.let {
-            Text(it)
-        }
+        MensajeFormulario(estado.mensaje, estado.esError)
     }
 }

@@ -8,6 +8,7 @@ import com.example.corpalivapp.data.DatabaseProvider
 import com.example.corpalivapp.data.PasswordUtils
 import com.example.corpalivapp.viewmodel.validation.LoginValidator
 
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -36,6 +37,7 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
 
     // Actualizar contraseña
     fun actualizarClave(valor: String) {
+        if (_uiState.value.cargando) return
         _uiState.update { estado ->
             estado.copy(
                 clave = valor,
@@ -47,6 +49,7 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
 
     // Iniciar sesion
     fun validarFormulario() {
+        if (_uiState.value.cargando) return
 
         val estado = _uiState.value
 
@@ -126,6 +129,8 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
                     )
                 }
 
+            } catch (e: CancellationException) {
+                throw e
             } catch (e: Exception) {
 
                 _uiState.update {

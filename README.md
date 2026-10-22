@@ -94,3 +94,12 @@ El APK de depuración se genera en `app/build/outputs/apk/debug/app-debug.apk`.
 - Si las notificaciones están bloqueadas, pueden habilitarse desde los ajustes de la aplicación en Android.
 - Desinstalar la aplicación o borrar sus datos elimina la información local de esta instalación. Para probar migraciones se debe actualizar la app conservando sus datos.
 - La opción de seguimiento guarda una preferencia; no envía correos ni mensajes automáticamente.
+
+## Validación final y rotación
+
+- Registro y Contacto mantienen sus campos en ViewModels durante cambios de orientación; sus operaciones de guardado no dependen de la composición de la pantalla.
+- Los campos muestran mensajes e iconos de error. Los botones y controles se bloquean mientras se procesa el formulario, y los resultados aparecen con una transición animada.
+- Al registrar correctamente un aporte se intenta publicar una notificación local. Requiere que el usuario haya autorizado las notificaciones desde Ajustes; rechazar ese permiso no impide guardar el aporte.
+- La fotografía es un documento de prueba adjunto; no autentica cédulas ni personas.
+
+Para ejecutar las pruebas locales de validación: `.gradlew.bat testDebugUnitTest`.

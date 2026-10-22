@@ -3,292 +3,112 @@ package com.example.corpalivapp.ui.screens
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.platform.LocalContext
-
-import com.example.corpalivapp.data.DatabaseProvider
-import com.example.corpalivapp.data.SolicitudContacto
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.corpalivapp.ui.components.IconoErrorCampo
+import com.example.corpalivapp.ui.components.MensajeFormulario
+import com.example.corpalivapp.ui.theme.TextoSobreVerde
 import com.example.corpalivapp.ui.theme.VerdeCorpaliv
-import com.example.corpalivapp.viewmodel.validation.LoginValidator
-
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import com.example.corpalivapp.viewmodel.ContactoViewModel
+import com.example.corpalivapp.viewmodel.validation.ContactoValidator
 
 @Composable
 fun ContactoScreen(
     modifier: Modifier = Modifier,
     usuarioId: Int? = null,
-    onMenuClick: () -> Unit = {}
+    onMenuClick: () -> Unit = {},
+    contactoViewModel: ContactoViewModel = viewModel(key = "contacto_${usuarioId ?: "invitado"}")
 ) {
-    val verde = VerdeCorpaliv
-
-    // Colores modo claro y oscuro
-    val fondo = MaterialTheme.colorScheme.background
-
+    val estado by contactoViewModel.uiState.collectAsStateWithLifecycle()
     val colorTexto = MaterialTheme.colorScheme.onBackground
-
     val colorTitulo = MaterialTheme.colorScheme.primary
-
-    val colorCampo = MaterialTheme.colorScheme.surfaceContainer
-
     val coloresCampo = OutlinedTextFieldDefaults.colors(
-        focusedTextColor = colorTexto,
-        unfocusedTextColor = colorTexto,
-        focusedContainerColor = colorCampo,
-        unfocusedContainerColor = colorCampo,
+        focusedTextColor = colorTexto, unfocusedTextColor = colorTexto,
+        focusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+        unfocusedContainerColor = MaterialTheme.colorScheme.surfaceContainer,
         focusedBorderColor = colorTitulo,
         unfocusedBorderColor = MaterialTheme.colorScheme.outline,
-        focusedLabelColor = colorTitulo,
-        unfocusedLabelColor = colorTexto,
+        focusedLabelColor = colorTitulo, unfocusedLabelColor = colorTexto,
         cursorColor = colorTitulo
     )
 
-    val context = LocalContext.current
-    val scope = rememberCoroutineScope()
-
-    var nombre by rememberSaveable { mutableStateOf("") }
-    var correo by rememberSaveable { mutableStateOf("") }
-    var mensaje by rememberSaveable { mutableStateOf("") }
-
-    var tipoColaboracion by rememberSaveable {
-        mutableStateOf("Donaciones")
-    }
-
-    var guardando by remember { mutableStateOf(false) }
-    var mensajeResultado by remember { mutableStateOf("") }
-    var guardadoExitoso by remember { mutableStateOf(false) }
-
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .background(fondo)
-            .verticalScroll(rememberScrollState())
-    ) {
-
-        // Enca
+    Column(modifier = modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)
+        .verticalScroll(rememberScrollState())) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(verde)
-                .padding(16.dp),
+            modifier = Modifier.fillMaxWidth().background(VerdeCorpaliv).padding(16.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                text = "Contáctanos",
-                color = Color.White,
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold
-            )
-
+            Text("Contáctanos", color = TextoSobreVerde, fontSize = 20.sp, fontWeight = FontWeight.Bold)
             TextButton(onClick = onMenuClick) {
-                Text(
-                    text = "☰",
-                    color = Color.White,
-                    fontSize = 26.sp
-                )
+                Text("☰", color = TextoSobreVerde, fontSize = 26.sp)
             }
         }
 
-        // Formu
-        Column(
-            modifier = Modifier.padding(24.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-
-            Text(
-                text = "¡Hablemos!",
-                fontSize = 26.sp,
-                fontWeight = FontWeight.Bold,
-                color = colorTitulo
-            )
-
-            Text(
-                text = "Completa el formulario y cuéntanos cómo te gustaría colaborar con CORPALIV.",
-                color = colorTexto
-            )
-
-            // Nombre
+        Column(modifier = Modifier.padding(24.dp).navigationBarsPadding(),
+            verticalArrangement = Arrangement.spacedBy(16.dp)) {
+            Text("¡Hablemos!", fontSize = 26.sp, fontWeight = FontWeight.Bold, color = colorTitulo)
+            Text("Completa el formulario y cuéntanos cómo te gustaría colaborar con CORPALIV.", color = colorTexto)
             OutlinedTextField(
-                value = nombre,
-                onValueChange = {
-                    nombre = it
-                    mensajeResultado = ""
-                },
-                label = { Text("Nombre completo") },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
-                enabled = !guardando,
-                colors = coloresCampo
+                value = estado.nombre, onValueChange = contactoViewModel::actualizarNombre,
+                label = { Text("Nombre completo") }, modifier = Modifier.fillMaxWidth(),
+                singleLine = true, enabled = !estado.guardando, colors = coloresCampo,
+                isError = estado.errorNombre != null,
+                supportingText = { estado.errorNombre?.let { Text(it) } },
+                trailingIcon = { IconoErrorCampo(estado.errorNombre) }
             )
-
-            // Correo
             OutlinedTextField(
-                value = correo,
-                onValueChange = {
-                    correo = it
-                    mensajeResultado = ""
-                },
-                label = { Text("Correo electrónico") },
-                modifier = Modifier.fillMaxWidth(),
-                singleLine = true,
-                enabled = !guardando,
-                colors = coloresCampo
+                value = estado.correo, onValueChange = contactoViewModel::actualizarCorreo,
+                label = { Text("Correo electrónico") }, modifier = Modifier.fillMaxWidth(),
+                singleLine = true, enabled = !estado.guardando, colors = coloresCampo,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Email),
+                isError = estado.errorCorreo != null,
+                supportingText = { estado.errorCorreo?.let { Text(it) } },
+                trailingIcon = { IconoErrorCampo(estado.errorCorreo) }
             )
-
-            Text(
-                text = "¿Cómo deseas colaborar?",
-                fontWeight = FontWeight.Bold,
-                color = colorTitulo
-            )
-
-            // Tipos de colaboracion
-            val opciones = listOf(
-                "Donaciones",
-                "Voluntariado",
-                "Alianzas con empresas",
-                "Consulta general"
-            )
-
-            opciones.forEach { opcion ->
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    RadioButton(
-                        selected = tipoColaboracion == opcion,
-                        onClick = {
-                            tipoColaboracion = opcion
-                            mensajeResultado = ""
-                        },
-                        enabled = !guardando,
-                        colors = RadioButtonDefaults.colors(
-                            selectedColor = colorTitulo,
-                            unselectedColor = colorTexto
-                        )
-                    )
-
-                    Text(
-                        text = opcion,
-                        color = colorTexto
-                    )
+            Text("¿Cómo deseas colaborar?", fontWeight = FontWeight.Bold, color = colorTitulo)
+            ContactoValidator.tipos.forEach { opcion ->
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    RadioButton(selected = estado.tipoColaboracion == opcion,
+                        onClick = { contactoViewModel.actualizarTipo(opcion) }, enabled = !estado.guardando,
+                        colors = RadioButtonDefaults.colors(selectedColor = colorTitulo, unselectedColor = colorTexto))
+                    Text(opcion, color = colorTexto)
                 }
             }
-
-            // Mensaje
+            MensajeFormulario(estado.errorTipo, esError = true)
             OutlinedTextField(
-                value = mensaje,
-                onValueChange = {
-                    mensaje = it
-                    mensajeResultado = ""
-                },
+                value = estado.mensaje, onValueChange = contactoViewModel::actualizarMensaje,
                 label = { Text("Mensaje") },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(130.dp),
-                maxLines = 5,
-                enabled = !guardando,
-                colors = coloresCampo
+                modifier = Modifier.fillMaxWidth().heightIn(min = 130.dp),
+                minLines = 3, maxLines = 5, enabled = !estado.guardando, colors = coloresCampo,
+                isError = estado.errorMensaje != null,
+                supportingText = { estado.errorMensaje?.let { Text(it) } },
+                trailingIcon = { IconoErrorCampo(estado.errorMensaje) }
             )
-
-            // Boton guardar
             Button(
-                onClick = {
-                    val nombreLimpio = nombre.trim()
-                    val correoLimpio = correo.trim().lowercase()
-                    val mensajeLimpio = mensaje.trim()
-
-                    val errorCorreo =
-                        LoginValidator.validarCorreo(correoLimpio)
-
-                    if (errorCorreo != null) {
-                        guardadoExitoso = false
-                        mensajeResultado = errorCorreo
-                    } else {
-                        guardando = true
-                        mensajeResultado = ""
-
-                        scope.launch {
-                            try {
-                                val solicitud = SolicitudContacto(
-                                    nombre = nombreLimpio,
-                                    correo = correoLimpio,
-                                    tipoColaboracion = tipoColaboracion,
-                                    mensaje = mensajeLimpio,
-                                    usuarioId = usuarioId
-                                )
-
-                                withContext(Dispatchers.IO) {
-                                    DatabaseProvider
-                                        .obtenerDatabase(context)
-                                        .solicitudContactoDao()
-                                        .guardarSolicitud(solicitud)
-                                }
-
-                                // LIMPIAR FORMULARIO
-                                nombre = ""
-                                correo = ""
-                                mensaje = ""
-                                tipoColaboracion = "Donaciones"
-
-                                guardadoExitoso = true
-                                mensajeResultado =
-                                    "Solicitud guardada correctamente."
-
-                            } catch (e: Exception) {
-                                guardadoExitoso = false
-                                mensajeResultado =
-                                    "No se pudo guardar la solicitud."
-                            } finally {
-                                guardando = false
-                            }
-                        }
-                    }
-                },
-                modifier = Modifier.fillMaxWidth(),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = verde,
-                    contentColor = Color.White
-                ),
-                shape = RoundedCornerShape(12.dp),
-                enabled = !guardando &&
-                        nombre.isNotBlank() &&
-                        correo.isNotBlank() &&
-                        mensaje.isNotBlank()
+                onClick = { contactoViewModel.enviar(usuarioId) }, enabled = !estado.guardando,
+                modifier = Modifier.fillMaxWidth(), shape = RoundedCornerShape(12.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = VerdeCorpaliv, contentColor = TextoSobreVerde)
             ) {
-                if (guardando) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(20.dp),
-                        color = Color.White,
-                        strokeWidth = 2.dp
-                    )
-                } else {
-                    Text("Enviar solicitud")
+                if (estado.guardando) {
+                    CircularProgressIndicator(modifier = Modifier.size(20.dp), color = TextoSobreVerde, strokeWidth = 2.dp)
+                    Spacer(Modifier.width(8.dp))
                 }
+                Text(if (estado.guardando) "Guardando..." else "Enviar solicitud")
             }
-
-            // Mensaje del resultado
-            if (mensajeResultado.isNotEmpty()) {
-                Text(
-                    text = mensajeResultado,
-                    color = if (guardadoExitoso) {
-                        colorTitulo
-                    } else {
-                        MaterialTheme.colorScheme.error
-                    },
-                    fontWeight = FontWeight.Bold
-                )
-            }
+            MensajeFormulario(estado.resultado, estado.esError)
         }
     }
 }

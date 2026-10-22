@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.compose.runtime.saveable.rememberSaveable
 
 import com.example.corpalivapp.data.DatabaseProvider
 import com.example.corpalivapp.data.PasswordUtils
@@ -48,7 +49,7 @@ fun LoginScreen(
         }
     }
 
-    var mostrarRegistro by remember { mutableStateOf(false) }
+    var mostrarRegistro by rememberSaveable{ mutableStateOf(false) }
 
     val verde = VerdeCorpaliv
     val fondo = MaterialTheme.colorScheme.background
@@ -84,6 +85,8 @@ fun LoginScreen(
         }
 
         if (mostrarRegistro) {
+            var nombre by rememberSaveable { mutableStateOf("") }
+            var correo by rememberSaveable { mutableStateOf("") }
             RegistroContenido(
                 onVolverClick = {
                     mostrarRegistro = false
@@ -152,6 +155,7 @@ fun LoginContenido(
         OutlinedTextField(
             value = estado.correo,
             onValueChange = onCorreoChange,
+            enabled = !estado.cargando,
             label = { Text("Correo electrónico") },
             modifier = Modifier.fillMaxWidth(),
             singleLine = true,
@@ -170,6 +174,7 @@ fun LoginContenido(
         OutlinedTextField(
             value = estado.clave,
             onValueChange = onClaveChange,
+            enabled = !estado.cargando,
             label = { Text("Contraseña") },
             modifier = Modifier.fillMaxWidth(),
             singleLine = true,
@@ -206,7 +211,7 @@ fun LoginContenido(
             )
         }
 
-        TextButton(onClick = onRegistroClick) {
+        TextButton(onClick = onRegistroClick, enabled = !estado.cargando,) {
             Text(
                 text = "¿No tienes una cuenta? Regístrate",
                 color = colorTitulo
@@ -365,6 +370,11 @@ fun RegistroContenido(
                                 }
 
                             } catch (e: Exception) {
+                                android.util.Log.e(
+                                    "CORPALIV_REGISTRO",
+                                    "Error al registrar usuario",
+                                    e
+                                )
                                 mensaje = "No se pudo registrar la cuenta"
                             } finally {
                                 registrando = false
@@ -396,7 +406,10 @@ fun RegistroContenido(
             )
         }
 
-        TextButton(onClick = onVolverClick) {
+        TextButton(
+            onClick = onVolverClick,
+            enabled = !registrando
+        ) {
             Text(
                 text = "Volver a iniciar sesión",
                 color = colorTitulo

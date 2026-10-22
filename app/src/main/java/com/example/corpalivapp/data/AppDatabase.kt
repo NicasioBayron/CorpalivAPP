@@ -6,9 +6,10 @@ import androidx.room.RoomDatabase
 @Database(
     entities = [
         Usuario::class,
-        SolicitudContacto::class
+        SolicitudContacto::class,
+        Donacion::class
     ],
-    version = 4,
+    version = 6,
     exportSchema = false
 )
 abstract class AppDatabase : RoomDatabase() {
@@ -16,4 +17,6 @@ abstract class AppDatabase : RoomDatabase() {
     abstract fun usuarioDao(): UsuarioDao
 
     abstract fun solicitudContactoDao(): SolicitudContactoDao
+
+    abstract fun donacionDao(): DonacionDao
 }

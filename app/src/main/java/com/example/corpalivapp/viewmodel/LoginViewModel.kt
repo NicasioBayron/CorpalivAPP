@@ -24,6 +24,7 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
 
     // Actualizar correo
     fun actualizarCorreo(valor: String) {
+        if (_uiState.value.cargando) return
         _uiState.update { estado ->
             estado.copy(
                 correo = valor,

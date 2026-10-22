@@ -21,7 +21,8 @@ import com.example.corpalivapp.ui.screens.NosotrosScreen
 import com.example.corpalivapp.ui.screens.UsuarioScreen
 import com.example.corpalivapp.ui.theme.CorpalivAppTheme
 import com.example.corpalivapp.viewmodel.LoginViewModel
-
+import com.example.corpalivapp.ui.screens.DonacionScreen
+import com.example.corpalivapp.ui.screens.HistorialAportesScreen
 @Composable
 fun App() {
     val loginViewModel: LoginViewModel = viewModel()
@@ -65,6 +66,9 @@ fun App() {
                                 onInicioClick = {
                                     pantallaActual = "Inicio"
                                 },
+                                onHistorialClick = {
+                                    pantallaActual = "Mis aportes"
+                                },
                                 onCerrarSesion = {
                                     loginViewModel.cerrarSesion()
                                     usuarioId = null
@@ -87,6 +91,24 @@ fun App() {
                             pantallaActual = "Usuario"
                         }
                     )
+
+                    "Mis aportes" -> {
+                        val idActual = usuarioId
+
+                        if (idActual != null) {
+                            HistorialAportesScreen(
+                                usuarioId = idActual,
+                                modifier = Modifier.fillMaxSize(),
+                                onVolverClick = {
+                                    pantallaActual = "Usuario"
+                                }
+                            )
+                        } else {
+                            LaunchedEffect(Unit) {
+                                pantallaActual = "Iniciar sesión"
+                            }
+                        }
+                    }
 
                     "Ajustes" -> AjustesScreen(
                         modifier = Modifier.fillMaxSize(),
@@ -114,8 +136,20 @@ fun App() {
                     "Aportes" -> AportesScreen(
                         modifier = Modifier.fillMaxSize(),
                         onMenuClick = abrirMenu,
-                        onContactoClick = {
-                            pantallaActual = "Contactanos"
+                        onDonacionClick = {
+                            pantallaActual = if (usuarioId != null){
+                                "Donacion"
+                            } else {
+                                "Iniciar sesión"
+                            }
+                        }
+                    )
+
+                    "Donacion" -> DonacionScreen(
+                        usuarioId = usuarioId,
+                        modifier = Modifier.fillMaxSize(),
+                        onVolverClick = {
+                            pantallaActual = "Aportes"
                         }
                     )
 

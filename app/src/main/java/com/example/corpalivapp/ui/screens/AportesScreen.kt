@@ -30,7 +30,7 @@ import com.example.corpalivapp.ui.theme.VerdeCorpaliv
 fun AportesScreen(
     modifier: Modifier = Modifier,
     onMenuClick: () -> Unit = {},
-    onContactoClick: () -> Unit = {}
+    onDonacionClick: () -> Unit = {}
 ) {
 
     val verde = VerdeCorpaliv
@@ -167,7 +167,7 @@ fun AportesScreen(
 
             // Boton contacto
             Button(
-                onClick = onContactoClick,
+                onClick = onDonacionClick,
                 modifier = Modifier.fillMaxWidth(),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = verde,
@@ -175,7 +175,7 @@ fun AportesScreen(
                 ),
                 shape = RoundedCornerShape(12.dp)
             ) {
-                Text("Solicitar contacto")
+                Text("Realizar aporte")
             }
         }
     }

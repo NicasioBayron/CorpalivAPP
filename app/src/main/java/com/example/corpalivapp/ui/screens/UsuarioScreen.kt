@@ -40,6 +40,7 @@ fun UsuarioScreen(
     onMenuClick: () -> Unit = {},
     onInicioClick: () -> Unit = {},
     onCerrarSesion: () -> Unit = {},
+    onHistorialClick: () -> Unit = {},
     perfilViewModel: PerfilViewModel = viewModel()
 ) {
     val verde = VerdeCorpaliv
@@ -217,6 +218,13 @@ fun UsuarioScreen(
                         )
                     }
                 }
+            }
+
+            OutlinedButton(
+                onClick = onHistorialClick,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text("Ver mis aportes")
             }
 
             // Volver al inicio

@@ -14,6 +14,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.corpalivapp.ui.theme.VerdeCorpaliv
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
+import com.example.corpalivapp.ui.components.ProgramaCard
 
 @Composable
 fun NosotrosScreen(
@@ -42,22 +45,25 @@ fun NosotrosScreen(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(verde)
-                .padding(16.dp),
+                .padding(horizontal = 16.dp, vertical = 8.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
-                text = "Sobre nosotros",
-                color = Color.White,
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold
+                text = "CORPALIV",
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = Color.White
             )
 
-            TextButton(onClick = onMenuClick) {
+            IconButton(onClick = onMenuClick) {
                 Text(
                     text = "☰",
                     color = Color.White,
-                    fontSize = 26.sp
+                    fontSize = 28.sp,
+                    modifier = Modifier.semantics {
+                        contentDescription = "Abrir menú principal"
+                    }
                 )
             }
         }
@@ -69,16 +75,16 @@ fun NosotrosScreen(
         ) {
 
             Text(
-                text = "Conoce CORPALIV",
-                fontSize = 26.sp,
+                text = "Quiénes somos",
+                style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
                 color = colorTitulo
             )
-
             Text(
-                text = "Trabajamos para promover oportunidades de inclusión y participación.",
+                text = "Acompañamos a personas con discapacidad múltiple y sus familias.",
                 color = colorTexto
             )
+
 
             // Quienes somos
             Card(
@@ -101,7 +107,10 @@ fun NosotrosScreen(
                     Spacer(modifier = Modifier.height(8.dp))
 
                     Text(
-                        text = "CORPALIV es una organización enfocada en promover la inclusión y generar oportunidades para las personas.",
+                        text = "CORPALIV, Corporación de Padres y Amigos por el Limitado Visual, " +
+                                "es una organización sin fines de lucro fundada en 1993. " +
+                                "Surgió de familias que buscaban oportunidades educativas " +
+                                "adecuadas para sus hijos e hijas.",
                         color = colorTexto
                     )
                 }
@@ -128,11 +137,36 @@ fun NosotrosScreen(
                     Spacer(modifier = Modifier.height(8.dp))
 
                     Text(
-                        text = "Impulsar espacios de aprendizaje, desarrollo y participación inclusiva.",
+                        text = "Acompañar durante toda la vida a niños, niñas, jóvenes y adultos " +
+                                "con discapacidad múltiple, mediante una atención integral " +
+                                "que considere sus necesidades y diferencias.",
                         color = colorTexto
                     )
                 }
             }
+
+            Text(
+                text = "Nuestra visión",
+                style = MaterialTheme.typography.titleLarge,
+                color = colorTitulo
+            )
+
+            Text(
+                text = "Contribuir a un país sin barreras para las personas " +
+                        "con discapacidad múltiple.",
+                color = colorTexto
+            )
+
+            Text(
+                text = "Nuestros valores",
+                style = MaterialTheme.typography.titleLarge,
+                color = colorTitulo
+            )
+
+            Text(
+                text = "Compromiso · Respeto · Empatía · Solidaridad",
+                color = colorTexto
+            )
 
             // Programas
             Text(
@@ -142,53 +176,19 @@ fun NosotrosScreen(
                 color = colorTitulo
             )
 
-            // Escuela JAN VAN DIJK
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(
-                    containerColor = fondoTarjetaVerde
-                ),
-                shape = RoundedCornerShape(16.dp)
-            ) {
-                Column(
-                    modifier = Modifier.padding(20.dp)
-                ) {
-                    Text(
-                        text = "Escuela Jan Van Dijk",
-                        fontWeight = FontWeight.Bold,
-                        color = colorTitulo
-                    )
+            ProgramaCard(
+                titulo = "Escuela Jan Van Dijk",
+                descripcion = "Educación especializada para niños, niñas y jóvenes " +
+                        "con discapacidad múltiple o sordoceguera. Promueve la " +
+                        "comunicación, la autonomía y el aprendizaje junto a sus familias."
+            )
 
-                    Text(
-                        text = "Programa orientado a la educación y el desarrollo.",
-                        color = colorTexto
-                    )
-                }
-            }
-
-            // ALBA LAB
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(
-                    containerColor = fondoTarjetaBeige
-                ),
-                shape = RoundedCornerShape(16.dp)
-            ) {
-                Column(
-                    modifier = Modifier.padding(20.dp)
-                ) {
-                    Text(
-                        text = "Alba Lab",
-                        fontWeight = FontWeight.Bold,
-                        color = colorTituloBeige
-                    )
-
-                    Text(
-                        text = "Programa enfocado en la inclusión y las oportunidades laborales.",
-                        color = colorTexto
-                    )
-                }
-            }
+            ProgramaCard(
+                titulo = "Alba Lab",
+                descripcion = "Red de inclusión sociolaboral para jóvenes y adultos " +
+                        "con discapacidad múltiple. Desarrolla habilidades personales " +
+                        "y laborales mediante formación, talleres y oportunidades de participación."
+            )
         }
     }
 }

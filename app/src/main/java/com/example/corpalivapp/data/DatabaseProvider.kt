@@ -50,6 +50,40 @@ object DatabaseProvider {
             db.execSQL("ALTER TABLE usuarios ADD COLUMN fotoPerfil TEXT")
         }
     }
+
+    private val MIGRATION_4_5 = object : Migration(4, 5) {
+
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL(
+                """
+            CREATE TABLE IF NOT EXISTS donaciones (
+                id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+                usuarioId INTEGER NOT NULL,
+                nombre TEXT NOT NULL,
+                correo TEXT NOT NULL,
+                monto INTEGER NOT NULL,
+                fechaAporte TEXT NOT NULL,
+                aceptaCondiciones INTEGER NOT NULL,
+                recibirSeguimiento INTEGER NOT NULL,
+                fechaRegistro INTEGER NOT NULL,
+                fotoComprobante TEXT
+            )
+            """.trimIndent()
+            )
+        }
+    }
+    private val MIGRATION_5_6 = object : Migration(5, 6) {
+
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL(
+                "ALTER TABLE donaciones ADD COLUMN region TEXT"
+            )
+
+            db.execSQL(
+                "ALTER TABLE donaciones ADD COLUMN comuna TEXT"
+            )
+        }
+    }
     // obtener la base de datos
     fun obtenerDatabase(context: Context): AppDatabase {
 
@@ -63,7 +97,9 @@ object DatabaseProvider {
                 .addMigrations(
                     MIGRATION_1_2,
                     MIGRATION_2_3,
-                    MIGRATION_3_4
+                    MIGRATION_3_4,
+                    MIGRATION_4_5,
+                    MIGRATION_5_6
                 )
                 .build()
                 .also {

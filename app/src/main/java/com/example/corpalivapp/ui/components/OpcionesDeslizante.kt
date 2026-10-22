@@ -21,6 +21,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.corpalivapp.ui.theme.VerdeCorpaliv
 import kotlinx.coroutines.launch
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+
 
 @Composable
 fun OpcionesDeslizante(
@@ -39,12 +42,18 @@ fun OpcionesDeslizante(
 
     val opciones = listOf(
         "Inicio",
-        "Iniciar sesión",
-        "Ajustes",
+        "Sobre nosotros",
         "Aportes",
-        "Mis solicitudes",
         "Contactanos",
-        "Sobre nosotros"
+        "Iniciar sesión",
+        "Mis solicitudes",
+        "Ajustes"
+    )
+    val etiquetas = mapOf(
+        "Iniciar sesión" to "Mi cuenta",
+        "Aportes" to "Cómo colaborar",
+        "Contactanos" to "Contacto",
+        "Sobre nosotros" to "Quiénes somos"
     )
 
     ModalNavigationDrawer(
@@ -64,25 +73,32 @@ fun OpcionesDeslizante(
                 ) {
                     Text(
                         text = "CORPALIV",
+                        style = MaterialTheme.typography.headlineSmall,
                         color = Color.White,
                         fontWeight = FontWeight.Bold
                     )
 
                     Text(
-                        text = "Construyendo inclusión juntos",
+                        text = "Educación e inclusión sociolaboral",
+                        style = MaterialTheme.typography.bodyMedium,
                         color = Color.White
                     )
                 }
 
                 // Las opciones del menu
                 Column(
-                    modifier = Modifier.padding(12.dp),
+                    modifier = Modifier
+                        .weight(1f)
+                        .verticalScroll(rememberScrollState())
+                        .padding(12.dp),
                     verticalArrangement = Arrangement.spacedBy(4.dp)
                 ) {
                     opciones.forEach { opcion ->
                         NavigationDrawerItem(
                             label = {
-                                Text(text = opcion)
+                                Text(
+                                    text = etiquetas[opcion] ?: opcion
+                                )
                             },
                             selected = pantallaActual == opcion,
                             onClick = {

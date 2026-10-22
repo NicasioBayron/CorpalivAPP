@@ -121,12 +121,16 @@ fun HomeScreen(
 
             ProgramaCard(
                 titulo = "Escuela Jan Van Dijk",
-                descripcion = "Educación, formación e inclusión social.",
+                descripcion = "Educación especializada para niños, niñas y jóvenes " +
+                        "con discapacidad múltiple o sordoceguera. Promueve la " +
+                        "comunicación, la autonomía y el aprendizaje junto a sus familias."
             )
 
             ProgramaCard(
                 titulo = "Alba Lab",
-                descripcion = "Formación e inclusión sociolaboral.",
+                descripcion = "Red de inclusión sociolaboral para jóvenes y adultos " +
+                        "con discapacidad múltiple. Desarrolla habilidades personales " +
+                        "y laborales mediante formación, talleres y oportunidades de participación."
             )
 
             Button(

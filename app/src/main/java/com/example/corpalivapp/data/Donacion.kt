@@ -19,5 +19,6 @@ data class Donacion(
 
     val fotoComprobante: String? = null,
     val region: String? = null,
-    val comuna: String? = null
+    val comuna: String? = null,
+    val estado: String = "PENDIENTE"
 )

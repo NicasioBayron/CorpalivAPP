@@ -37,10 +37,12 @@ import com.example.corpalivapp.ui.theme.VerdeCorpaliv
 fun UsuarioScreen(
     usuarioId: Int,
     modifier: Modifier = Modifier,
+    esAdmin: Boolean = false,
     onMenuClick: () -> Unit = {},
     onInicioClick: () -> Unit = {},
     onCerrarSesion: () -> Unit = {},
     onHistorialClick: () -> Unit = {},
+    onAdminClick: () -> Unit = {},
     perfilViewModel: PerfilViewModel = viewModel()
 ) {
     val verde = VerdeCorpaliv
@@ -217,6 +219,19 @@ fun UsuarioScreen(
                             color = colorTexto
                         )
                     }
+                }
+            }
+
+            if (esAdmin) {
+                Button(
+                    onClick = onAdminClick,
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = verde,
+                        contentColor = Color.White
+                    )
+                ) {
+                    Text("Panel de administración")
                 }
             }
 

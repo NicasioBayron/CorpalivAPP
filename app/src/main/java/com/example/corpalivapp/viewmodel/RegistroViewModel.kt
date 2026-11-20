@@ -7,6 +7,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.example.corpalivapp.data.CorreoRegistradoException
 import com.example.corpalivapp.data.FormulariosRepository
+import com.example.corpalivapp.network.repository.UsuarioNetworkRepository
 import com.example.corpalivapp.viewmodel.validation.RegistroValidator
 import java.util.Locale
 import kotlinx.coroutines.CancellationException
@@ -32,6 +33,7 @@ class RegistroViewModel(
     private val savedState: SavedStateHandle
 ) : AndroidViewModel(application) {
     private val repositorio = FormulariosRepository(application)
+    private val networkRepo = UsuarioNetworkRepository()
     // La contraseña vive solo en memoria: no se serializa en SavedStateHandle.
     private val _uiState = MutableStateFlow(RegistroUiState(
         nombre = savedState["nombre"] ?: "",
@@ -76,8 +78,25 @@ class RegistroViewModel(
         _uiState.update { it.copy(registrando = true) }
         viewModelScope.launch {
             try {
-                repositorio.registrar(datos.nombre.trim(),
-                    datos.correo.trim().lowercase(Locale.ROOT), datos.clave)
+                val correoFinal = datos.correo.trim().lowercase(Locale.ROOT)
+                val nombreFinal = datos.nombre.trim()
+
+                // 1. Intentar registrar en el backend (network-first)
+                val networkResult = networkRepo.register(nombreFinal, correoFinal, datos.clave)
+                if (networkResult.isSuccess) {
+                    // Si el backend aceptó, igual guardamos localmente para acceso offline
+                    runCatching {
+                        repositorio.registrar(nombreFinal, correoFinal, datos.clave)
+                    }
+                    savedState["nombre"] = ""
+                    savedState["correo"] = ""
+                    _uiState.value = RegistroUiState(registrando = true,
+                        mensaje = "¡Cuenta registrada correctamente! Ya puedes iniciar sesión.")
+                    return@launch
+                }
+
+                // 2. Fallback: solo Room si no hay conexión al backend
+                repositorio.registrar(nombreFinal, correoFinal, datos.clave)
                 savedState["nombre"] = ""
                 savedState["correo"] = ""
                 _uiState.value = RegistroUiState(registrando = true,

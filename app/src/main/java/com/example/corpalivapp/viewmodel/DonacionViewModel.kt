@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.example.corpalivapp.notifications.Notificaciones
 import com.example.corpalivapp.data.Donacion
 import com.example.corpalivapp.data.DonacionRepository
+import com.example.corpalivapp.network.repository.DonacionNetworkRepository
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.launch
 import java.util.Locale
@@ -19,6 +20,7 @@ import com.example.corpalivapp.viewmodel.validation.DonacionValidator
 
 class DonacionViewModel(application: Application): AndroidViewModel(application) {
     private val repositorio = DonacionRepository(application)
+    private val networkRepo = DonacionNetworkRepository()
     private val _uiState = MutableStateFlow(DonacionUiState())
     val uiState = _uiState.asStateFlow()
 
@@ -163,7 +165,24 @@ class DonacionViewModel(application: Application): AndroidViewModel(application)
 
         viewModelScope.launch {
             try {
+                // 1. Guardar en Room localmente
                 val id = repositorio.registrar(donacion)
+
+                // 2. Intentar sincronizar con el microservicio de Donaciones (8082)
+                runCatching {
+                    networkRepo.registrar(
+                        usuarioId = usuarioId.toLong(),
+                        nombre = donacion.nombre,
+                        correo = donacion.correo,
+                        monto = donacion.monto,
+                        fechaAporte = donacion.fechaAporte,
+                        aceptaCondiciones = donacion.aceptaCondiciones,
+                        recibirSeguimiento = donacion.recibirSeguimiento,
+                        fotoComprobante = donacion.fotoComprobante,
+                        region = donacion.region,
+                        comuna = donacion.comuna
+                    )
+                }
 
                 // Un aviso bloqueado nunca convierte un guardado correcto en un fallo.
                 runCatching {

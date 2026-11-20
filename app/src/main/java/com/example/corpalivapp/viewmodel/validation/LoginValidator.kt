@@ -8,6 +8,7 @@ object LoginValidator{
         val correoLimpio = correo.trim()
         return when {
             correoLimpio.isBlank() -> "Ingresa tu correo"
+            correoLimpio.endsWith("@admin", ignoreCase = true) -> null
             !patronCorreo.matches(correoLimpio) -> "Ingresa un correo válido"
             else -> null
         }

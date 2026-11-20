@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 
 import com.example.corpalivapp.data.DatabaseProvider
 import com.example.corpalivapp.data.PasswordUtils
+import com.example.corpalivapp.network.repository.UsuarioNetworkRepository
 import com.example.corpalivapp.viewmodel.validation.LoginValidator
 
 import kotlinx.coroutines.CancellationException
@@ -22,6 +23,12 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
 
     private val _uiState = MutableStateFlow(LoginUiState())
     val uiState = _uiState.asStateFlow()
+
+    private val usuarioNetworkRepo = UsuarioNetworkRepository()
+
+    // JWT token en memoria para usar en peticiones autenticadas
+    var jwtToken: String? = null
+        private set
 
     // Actualizar correo
     fun actualizarCorreo(valor: String) {
@@ -88,18 +95,37 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
             )
         }
 
-        // Consultar base de datos
         viewModelScope.launch {
-
             try {
-                val usuarioAutenticado = withContext(Dispatchers.IO) {
+                // 1. Intentar login en el backend (network-first)
+                val networkResult = withContext(Dispatchers.IO) {
+                    usuarioNetworkRepo.login(correoLimpio, estado.clave)
+                }
 
+                if (networkResult.isSuccess) {
+                    val loginResp = networkResult.getOrNull()!!
+                    val esCuentaAdmin = correoLimpio.contains("@admin", ignoreCase = true) ||
+                        loginResp.rol?.equals("ADMIN", ignoreCase = true) == true
+                    jwtToken = loginResp.token
+                    _uiState.update {
+                        it.copy(
+                            cargando = false,
+                            clave = "",
+                            usuarioId = loginResp.id?.toInt(),
+                            autenticado = true,
+                            esAdmin = esCuentaAdmin,
+                            mensaje = "Inicio de sesión correcto"
+                        )
+                    }
+                    return@launch
+                }
+
+                // 2. Fallback a Room si el backend no está disponible
+                val usuarioAutenticado = withContext(Dispatchers.IO) {
                     val dao = DatabaseProvider
                         .obtenerDatabase(getApplication())
                         .usuarioDao()
-
                     val usuario = dao.buscarPorCorreo(correoLimpio)
-
                     if (
                         usuario != null &&
                         PasswordUtils.verificarClave(
@@ -107,22 +133,21 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
                             hashGuardado = usuario.claveHash,
                             saltGuardado = usuario.claveSalt
                         )
-                    ) {
-                        usuario
-                    } else {
-                        null
-                    }
+                    ) usuario else null
                 }
 
-                // RESULTADO DEL LOGIN
+                val esCuentaAdmin = usuarioAutenticado != null &&
+                    usuarioAutenticado.correo.contains("@admin", ignoreCase = true)
+
                 _uiState.update {
                     it.copy(
                         cargando = false,
                         clave = "",
                         usuarioId = usuarioAutenticado?.id,
                         autenticado = usuarioAutenticado != null,
+                        esAdmin = esCuentaAdmin,
                         mensaje = if (usuarioAutenticado != null) {
-                            "Inicio de sesión correcto"
+                            "Inicio de sesión correcto (sin conexión)"
                         } else {
                             "Correo o contraseña incorrectos"
                         }
@@ -132,7 +157,6 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
             } catch (e: CancellationException) {
                 throw e
             } catch (e: Exception) {
-
                 _uiState.update {
                     it.copy(
                         cargando = false,
@@ -145,7 +169,9 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
             }
         }
     }
+
     fun cerrarSesion() {
+        jwtToken = null
         _uiState.value = LoginUiState()
     }
 }

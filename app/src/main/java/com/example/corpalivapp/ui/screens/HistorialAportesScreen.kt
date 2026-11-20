@@ -126,6 +126,16 @@ fun HistorialAportesScreen(
                             Text("Fecha prevista: $fecha")
 
                             Text(
+                                text = "Estado: ${aporte.estado}",
+                                style = MaterialTheme.typography.bodyMedium,
+                                color = when (aporte.estado.uppercase()) {
+                                    "APROBADA" -> MaterialTheme.colorScheme.primary
+                                    "RECHAZADA" -> MaterialTheme.colorScheme.error
+                                    else -> MaterialTheme.colorScheme.tertiary
+                                }
+                            )
+
+                            Text(
                                 text = "Región: " +
                                         (aporte.region ?: "No registrada")
                             )

@@ -19,4 +19,21 @@ interface DonacionDao {
         """
     )
     fun observarPorUsuario(usuarioId: Int): Flow<List<Donacion>>
+
+    @Query(
+        """
+        SELECT * FROM donaciones
+        ORDER BY fechaRegistro DESC, id DESC
+        """
+    )
+    fun observarTodas(): Flow<List<Donacion>>
+
+    @Query(
+        """
+        UPDATE donaciones
+        SET estado = :nuevoEstado
+        WHERE id = :id
+        """
+    )
+    suspend fun actualizarEstado(id: Int, nuevoEstado: String)
 }

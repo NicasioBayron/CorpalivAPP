@@ -25,4 +25,13 @@ class DonacionRepository(context: Context) {
     fun observarPorUsuario(usuarioId: Int): Flow<List<Donacion>>{
         return database.donacionDao().observarPorUsuario(usuarioId)
     }
+
+    fun observarTodas(): Flow<List<Donacion>> {
+        return database.donacionDao().observarTodas()
+    }
+
+    suspend fun actualizarEstado(id: Int, nuevoEstado: String) =
+        withContext(Dispatchers.IO) {
+            database.donacionDao().actualizarEstado(id, nuevoEstado)
+        }
 }

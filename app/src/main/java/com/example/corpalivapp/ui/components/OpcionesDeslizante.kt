@@ -29,6 +29,7 @@ import androidx.compose.foundation.verticalScroll
 fun OpcionesDeslizante(
     pantallaActual: String,
     onPantallaSeleccionada: (String) -> Unit,
+    esAdmin: Boolean = false,
     contenido: @Composable (abrirMenu: () -> Unit) -> Unit
 ) {
     val drawerState = rememberDrawerState(DrawerValue.Closed)
@@ -40,7 +41,7 @@ fun OpcionesDeslizante(
     val fondoSeleccionado = MaterialTheme.colorScheme.surfaceVariant
     val textoSeleccionado = MaterialTheme.colorScheme.primary
 
-    val opciones = listOf(
+    val opcionesBase = listOf(
         "Inicio",
         "Sobre nosotros",
         "Aportes",
@@ -49,7 +50,13 @@ fun OpcionesDeslizante(
         "Mis solicitudes",
         "Ajustes"
     )
+    val opciones = if (esAdmin) {
+        listOf("Inicio", "Panel admin") + opcionesBase.drop(1)
+    } else {
+        opcionesBase
+    }
     val etiquetas = mapOf(
+        "Panel admin" to "Panel de administración",
         "Iniciar sesión" to "Mi cuenta",
         "Aportes" to "Cómo colaborar",
         "Contactanos" to "Contacto",

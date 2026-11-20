@@ -8,5 +8,6 @@ data  class LoginUiState(
     val cargando: Boolean = false,
     val mensaje: String? = null,
     val usuarioId: Int? = null,
-    val autenticado: Boolean = false
+    val autenticado: Boolean = false,
+    val esAdmin: Boolean = false
 )

@@ -52,6 +52,11 @@ dependencies {
     implementation(libs.androidx.room.runtime) //Permite trabajar con la base de datos
     implementation(libs.androidx.room.ktx) //Facilita el uso de Room con corrutinas
     ksp(libs.androidx.room.compiler) //Genera automáticamente código necesario para Room
+    // Retrofit + Red
+    implementation(libs.retrofit)
+    implementation(libs.retrofit.gson)
+    implementation(libs.okhttp.logging)
+    implementation(libs.gson)
     testImplementation(libs.junit)
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.compose.ui.test.junit4)

@@ -27,33 +27,40 @@ fun HomeScreen(
     onColaborarClick: () -> Unit = {}
 ) {
     val verdeCorpaliv = VerdeCorpaliv
-
     val fondo = MaterialTheme.colorScheme.background
-
     val colorTexto = MaterialTheme.colorScheme.onBackground
-
     val colorTitulo = MaterialTheme.colorScheme.primary
-
+    //Contenedor
     Column(
+        //Permite modificaciones
         modifier = modifier
+            //Ocupa el espacio disponible
             .fillMaxSize()
+            //Color del fomdo
             .background(fondo)
+            //Permite deslizar de arriba a abajo
             .verticalScroll(rememberScrollState())
     ) {
 
         // Encabezado
         Column(
             modifier = Modifier
+                //Ocupa el espacio disponible de los lados
                 .fillMaxWidth()
                 .background(verdeCorpaliv)
+                //Es para q el contenido choque con la barra de estado de android
                 .statusBarsPadding()
+                //Añade un margen interno
                 .padding(24.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
 
             Row(
+                //Permite modificaciones, estan usan el ancho disponible
                 modifier = Modifier.fillMaxWidth(),
+                //Deja un espacio en el contenido horizontal
                 horizontalArrangement = Arrangement.SpaceBetween,
+                //Centra el contenido en modo vertical
                 verticalAlignment = Alignment.CenterVertically
             ) {
 

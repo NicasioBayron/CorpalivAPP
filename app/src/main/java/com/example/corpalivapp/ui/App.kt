@@ -23,6 +23,7 @@ import com.example.corpalivapp.ui.theme.CorpalivAppTheme
 import com.example.corpalivapp.viewmodel.LoginViewModel
 import com.example.corpalivapp.ui.screens.DonacionScreen
 import com.example.corpalivapp.ui.screens.HistorialAportesScreen
+import com.example.corpalivapp.ui.screens.AdminScreen
 @Composable
 fun App() {
     val loginViewModel: LoginViewModel = viewModel()
@@ -35,6 +36,10 @@ fun App() {
         mutableStateOf<Int?>(null)
     }
 
+    var esAdmin by rememberSaveable {
+        mutableStateOf(false)
+    }
+
     var modoOscuro by rememberSaveable {
         mutableStateOf(false)
     }
@@ -42,7 +47,8 @@ fun App() {
     CorpalivAppTheme(darkTheme = modoOscuro) {
         OpcionesDeslizante(
             pantallaActual = pantallaActual,
-            onPantallaSeleccionada = { pantallaActual = it }
+            onPantallaSeleccionada = { pantallaActual = it },
+            esAdmin = esAdmin
         ) { abrirMenu ->
 
             Surface(
@@ -62,6 +68,7 @@ fun App() {
                             UsuarioScreen(
                                 usuarioId = usuarioId!!,
                                 modifier = Modifier.fillMaxSize(),
+                                esAdmin = esAdmin,
                                 onMenuClick = abrirMenu,
                                 onInicioClick = {
                                     pantallaActual = "Inicio"
@@ -69,11 +76,28 @@ fun App() {
                                 onHistorialClick = {
                                     pantallaActual = "Mis aportes"
                                 },
+                                onAdminClick = {
+                                    pantallaActual = "Panel admin"
+                                },
                                 onCerrarSesion = {
                                     loginViewModel.cerrarSesion()
                                     usuarioId = null
+                                    esAdmin = false
                                     pantallaActual = "Iniciar sesión"
                                 }
+                            )
+                        } else {
+                            LaunchedEffect(Unit) {
+                                pantallaActual = "Iniciar sesión"
+                            }
+                        }
+                    }
+
+                    "Panel admin" -> {
+                        if (usuarioId != null && esAdmin) {
+                            AdminScreen(
+                                modifier = Modifier.fillMaxSize(),
+                                onMenuClick = abrirMenu
                             )
                         } else {
                             LaunchedEffect(Unit) {
@@ -86,9 +110,10 @@ fun App() {
                         modifier = Modifier.fillMaxSize(),
                         loginViewModel = loginViewModel,
                         onMenuClick = abrirMenu,
-                        onLoginExitoso = { id ->
+                        onLoginExitoso = { id, admin ->
                             usuarioId = id
-                            pantallaActual = "Usuario"
+                            esAdmin = admin
+                            pantallaActual = if (admin) "Panel admin" else "Usuario"
                         }
                     )
 

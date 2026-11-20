@@ -84,6 +84,15 @@ object DatabaseProvider {
             )
         }
     }
+
+    private val MIGRATION_6_7 = object : Migration(6, 7) {
+
+        override fun migrate(db: SupportSQLiteDatabase) {
+            db.execSQL(
+                "ALTER TABLE donaciones ADD COLUMN estado TEXT NOT NULL DEFAULT 'PENDIENTE'"
+            )
+        }
+    }
     // obtener la base de datos
     fun obtenerDatabase(context: Context): AppDatabase {
 
@@ -99,7 +108,8 @@ object DatabaseProvider {
                     MIGRATION_2_3,
                     MIGRATION_3_4,
                     MIGRATION_4_5,
-                    MIGRATION_5_6
+                    MIGRATION_5_6,
+                    MIGRATION_6_7
                 )
                 .build()
                 .also {

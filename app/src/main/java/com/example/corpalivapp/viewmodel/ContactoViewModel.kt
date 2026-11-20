@@ -6,6 +6,7 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.viewModelScope
 import com.example.corpalivapp.data.FormulariosRepository
 import com.example.corpalivapp.data.SolicitudContacto
+import com.example.corpalivapp.network.repository.ContactoNetworkRepository
 import com.example.corpalivapp.viewmodel.validation.ContactoValidator
 import java.util.Locale
 import kotlinx.coroutines.CancellationException
@@ -33,6 +34,7 @@ class ContactoViewModel(
     private val savedState: SavedStateHandle
 ) : AndroidViewModel(application) {
     private val repositorio = FormulariosRepository(application)
+    private val networkRepo = ContactoNetworkRepository()
     private val _uiState = MutableStateFlow(ContactoUiState(
         nombre = savedState["nombre"] ?: "",
         correo = savedState["correo"] ?: "",
@@ -79,17 +81,48 @@ class ContactoViewModel(
         _uiState.update { it.copy(guardando = true) }
         viewModelScope.launch {
             try {
-                repositorio.enviarContacto(SolicitudContacto(
-                    nombre = datos.nombre.trim(), correo = datos.correo.trim().lowercase(Locale.ROOT),
-                    mensaje = datos.mensaje.trim(), tipoColaboracion = datos.tipoColaboracion,
-                    usuarioId = usuarioId
-                ))
+                val nombreLimpio = datos.nombre.trim()
+                val correoLimpio = datos.correo.trim().lowercase(Locale.ROOT)
+                val mensajeLimpio = datos.mensaje.trim()
+                val tipo = datos.tipoColaboracion
+
+                // 1. Intentar enviar al backend (network-first)
+                val netResult = networkRepo.enviar(
+                    usuarioId = usuarioId?.toLong(),
+                    nombre = nombreLimpio,
+                    correo = correoLimpio,
+                    tipoColaboracion = tipo,
+                    mensaje = mensajeLimpio
+                )
+
+                // Siempre respaldamos en Room local
+                runCatching {
+                    repositorio.enviarContacto(
+                        SolicitudContacto(
+                            nombre = nombreLimpio,
+                            correo = correoLimpio,
+                            mensaje = mensajeLimpio,
+                            tipoColaboracion = tipo,
+                            usuarioId = usuarioId
+                        )
+                    )
+                }
+
                 savedState["nombre"] = ""
                 savedState["correo"] = ""
                 savedState["mensaje"] = ""
                 savedState["tipo"] = "Donaciones"
-                _uiState.value = ContactoUiState(guardando = true,
-                    resultado = "Solicitud guardada correctamente en este dispositivo.")
+
+                val mensajeExito = if (netResult.isSuccess) {
+                    "Solicitud enviada correctamente al servidor."
+                } else {
+                    "Solicitud guardada localmente (sin conexión con el servidor)."
+                }
+
+                _uiState.value = ContactoUiState(
+                    guardando = false,
+                    resultado = mensajeExito
+                )
             } catch (error: CancellationException) {
                 throw error
             } catch (error: Exception) {

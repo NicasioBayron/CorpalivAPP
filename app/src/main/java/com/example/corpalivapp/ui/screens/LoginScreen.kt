@@ -32,13 +32,13 @@ fun LoginScreen(
     modifier: Modifier = Modifier,
     loginViewModel: LoginViewModel = viewModel(),
     onMenuClick: () -> Unit = {},
-    onLoginExitoso: (Int) -> Unit = {}
+    onLoginExitoso: (Int, Boolean) -> Unit = { _, _ -> }
 ) {
     val estado by loginViewModel.uiState.collectAsStateWithLifecycle()
 
     LaunchedEffect(estado.autenticado, estado.usuarioId) {
         if (estado.autenticado && estado.usuarioId != null) {
-            onLoginExitoso(estado.usuarioId!!)
+            onLoginExitoso(estado.usuarioId!!, estado.esAdmin)
         }
     }
 

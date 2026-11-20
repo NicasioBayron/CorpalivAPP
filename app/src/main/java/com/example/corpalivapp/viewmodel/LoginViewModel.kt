@@ -3,20 +3,18 @@ package com.example.corpalivapp.viewmodel
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-
 import com.example.corpalivapp.data.DatabaseProvider
 import com.example.corpalivapp.data.PasswordUtils
+import com.example.corpalivapp.data.Usuario
 import com.example.corpalivapp.network.repository.UsuarioNetworkRepository
 import com.example.corpalivapp.viewmodel.validation.LoginValidator
-
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
-
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.Locale
 
 class LoginViewModel(application: Application) : AndroidViewModel(application) {
@@ -97,7 +95,7 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
 
         viewModelScope.launch {
             try {
-                // 1. Intentar login en el backend (network-first)
+                // 1. Intentar login en el backend mediante Retrofit (network-first)
                 val networkResult = withContext(Dispatchers.IO) {
                     usuarioNetworkRepo.login(correoLimpio, estado.clave)
                 }
@@ -107,20 +105,84 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
                     val esCuentaAdmin = correoLimpio.contains("@admin", ignoreCase = true) ||
                         loginResp.rol?.equals("ADMIN", ignoreCase = true) == true
                     jwtToken = loginResp.token
+
+                    // Sincronizar usuario con Room para compatibilidad con perfil y donaciones locales
+                    val idFinal = withContext(Dispatchers.IO) {
+                        val dao = DatabaseProvider
+                            .obtenerDatabase(getApplication())
+                            .usuarioDao()
+                        val existente = dao.buscarPorCorreo(correoLimpio)
+                        if (existente != null) {
+                            existente.id
+                        } else {
+                            val salt = PasswordUtils.generarSalt()
+                            val hash = PasswordUtils.generarHash(estado.clave, salt)
+                            val nuevo = Usuario(
+                                id = loginResp.id?.toInt() ?: 0,
+                                nombre = loginResp.nombre ?: correoLimpio.substringBefore("@"),
+                                correo = correoLimpio,
+                                claveHash = hash,
+                                claveSalt = salt,
+                                fotoPerfil = null
+                            )
+                            val nuevoId = dao.registrarUsuario(nuevo).toInt()
+                            if (nuevoId > 0) nuevoId else (loginResp.id?.toInt() ?: 1)
+                        }
+                    }
+
                     _uiState.update {
                         it.copy(
                             cargando = false,
                             clave = "",
-                            usuarioId = loginResp.id?.toInt(),
+                            usuarioId = idFinal,
                             autenticado = true,
                             esAdmin = esCuentaAdmin,
                             mensaje = "Inicio de sesión correcto"
                         )
                     }
                     return@launch
+                } else {
+                    val errorNet = networkResult.exceptionOrNull()?.message.orEmpty()
+                    // Si el backend rechazó explícitamente las credenciales
+                    if (errorNet.contains("Credenciales incorrectas", ignoreCase = true)) {
+                        // Comprobar si existe localmente en Room (cuenta creada offline)
+                        val usuarioLocal = withContext(Dispatchers.IO) {
+                            val dao = DatabaseProvider.obtenerDatabase(getApplication()).usuarioDao()
+                            val u = dao.buscarPorCorreo(correoLimpio)
+                            if (u != null && PasswordUtils.verificarClave(estado.clave, u.claveHash, u.claveSalt)) {
+                                u
+                            } else null
+                        }
+
+                        if (usuarioLocal != null) {
+                            val esCuentaAdmin = usuarioLocal.correo.contains("@admin", ignoreCase = true)
+                            _uiState.update {
+                                it.copy(
+                                    cargando = false,
+                                    clave = "",
+                                    usuarioId = usuarioLocal.id,
+                                    autenticado = true,
+                                    esAdmin = esCuentaAdmin,
+                                    mensaje = "Inicio de sesión correcto (local)"
+                                )
+                            }
+                            return@launch
+                        }
+
+                        _uiState.update {
+                            it.copy(
+                                cargando = false,
+                                clave = "",
+                                usuarioId = null,
+                                autenticado = false,
+                                mensaje = "Correo o contraseña incorrectos"
+                            )
+                        }
+                        return@launch
+                    }
                 }
 
-                // 2. Fallback a Room si el backend no está disponible
+                // 2. Fallback a Room si el backend no estuvo disponible (ej: sin conexión)
                 val usuarioAutenticado = withContext(Dispatchers.IO) {
                     val dao = DatabaseProvider
                         .obtenerDatabase(getApplication())

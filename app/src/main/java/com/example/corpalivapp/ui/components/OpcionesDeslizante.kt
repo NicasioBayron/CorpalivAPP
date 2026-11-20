@@ -5,6 +5,8 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
@@ -21,9 +23,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.corpalivapp.ui.theme.VerdeCorpaliv
 import kotlinx.coroutines.launch
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
-
 
 @Composable
 fun OpcionesDeslizante(
@@ -43,6 +42,7 @@ fun OpcionesDeslizante(
 
     val opcionesBase = listOf(
         "Inicio",
+        "Publicaciones",
         "Sobre nosotros",
         "Aportes",
         "Contactanos",
@@ -57,6 +57,7 @@ fun OpcionesDeslizante(
     }
     val etiquetas = mapOf(
         "Panel admin" to "Panel de administración",
+        "Publicaciones" to "Publicaciones (Retrofit)",
         "Iniciar sesión" to "Mi cuenta",
         "Aportes" to "Cómo colaborar",
         "Contactanos" to "Contacto",

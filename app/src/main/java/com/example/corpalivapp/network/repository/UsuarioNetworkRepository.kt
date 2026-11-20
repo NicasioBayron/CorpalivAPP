@@ -8,33 +8,56 @@ import com.example.corpalivapp.network.dto.RegisterResponse
 
 /**
  * Repositorio de red para Usuarios.
- * Usa el microservicio Usuario-service (puerto 8081).
+ * Conecta con el microservicio Usuario-service (puerto 8081) a través de Retrofit.
  */
 class UsuarioNetworkRepository {
 
-    private val api = RetrofitClient.usuarioApi
+    private val api get() = RetrofitClient.usuarioApi
 
     /**
-     * Envía credenciales al backend.
-     * Devuelve un [Result] con el [LoginResponse] si el servidor respondió,
-     * o un fallo si no hay conexión (el ViewModel manejará el fallback a Room).
+     * Envía credenciales al backend mediante Retrofit.
+     * Retorna éxito solo si las credenciales son válidas y el servidor devuelve un token.
      */
     suspend fun login(email: String, password: String): Result<LoginResponse> = runCatching {
         val response = api.login(LoginRequest(email = email, password = password))
         if (response.isSuccessful && response.body() != null) {
-            response.body()!!
+            val body = response.body()!!
+            if (body.status.equals("error", ignoreCase = true) || body.token.isNullOrBlank()) {
+                throw Exception(body.message ?: "Credenciales incorrectas")
+            }
+            body
         } else {
-            throw Exception(response.errorBody()?.string() ?: "Error de autenticación")
+            throw Exception(response.errorBody()?.string() ?: "Error de autenticación (${response.code()})")
         }
     }
 
+    /**
+     * Registra un nuevo usuario en el backend.
+     * Lanza excepción si el backend responde con error (por ejemplo, si el correo ya existe).
+     */
     suspend fun register(nombre: String, email: String, password: String): Result<RegisterResponse> =
         runCatching {
             val response = api.register(RegisterRequest(nombre = nombre, email = email, password = password))
             if (response.isSuccessful && response.body() != null) {
-                response.body()!!
+                val body = response.body()!!
+                if (body.status.equals("error", ignoreCase = true)) {
+                    throw Exception(body.message)
+                }
+                body
             } else {
-                throw Exception(response.errorBody()?.string() ?: "Error al registrar")
+                throw Exception(response.errorBody()?.string() ?: "Error al registrar (${response.code()})")
             }
         }
+
+    /**
+     * Consulta los datos de un usuario por su ID en el backend.
+     */
+    suspend fun obtenerPorId(id: Long): Result<LoginResponse> = runCatching {
+        val response = api.obtenerPorId(id)
+        if (response.isSuccessful && response.body() != null) {
+            response.body()!!
+        } else {
+            throw Exception("Error al obtener usuario: ${response.code()}")
+        }
+    }
 }

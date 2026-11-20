@@ -2,14 +2,21 @@ package com.example.corpalivapp.data
 
 import androidx.room.Dao
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface DonacionDao {
 
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun registrar(donacion: Donacion): Long
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun registrarLista(donaciones: List<Donacion>)
+
+    @Query("SELECT * FROM donaciones WHERE id = :id LIMIT 1")
+    suspend fun buscarPorId(id: Int): Donacion?
 
     @Query(
         """

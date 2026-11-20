@@ -4,57 +4,51 @@ import com.example.corpalivapp.network.api.ContactoApi
 import com.example.corpalivapp.network.api.DonacionesApi
 import com.example.corpalivapp.network.api.UsuarioApi
 import okhttp3.OkHttpClient
-import okhttp3.logging.HttpLoggingInterceptor
-import retrofit2.Retrofit
-import retrofit2.converter.gson.GsonConverterFactory
-import java.util.concurrent.TimeUnit
 
 /**
- * Cliente Retrofit singleton para los tres microservicios.
- *
- * Puertos:
- *   - Usuario-service  → 8081
- *   - Donaciones-service → 8082
- *   - Contacto-service → 8083
- *
- * Para emulador de Android Studio se usa 10.0.2.2 (apunta al localhost de tu PC).
- * Para dispositivo físico conectado por USB en la misma red, usa la IP local
- * de tu PC (ej: 192.168.1.100).
+ * Cliente Retrofit singleton para los microservicios.
+ * Administra las instancias de las APIs basándose en [RetrofitConfig].
  */
 object RetrofitClient {
 
-    // ─── Cambia aquí si usas dispositivo físico (IP de tu PC en la red WiFi) ───
-    private const val HOST = "10.0.2.2"
-    // ────────────────────────────────────────────────────────────────────────────
+    private var okHttpClient: OkHttpClient = RetrofitConfig.crearOkHttpClient()
 
-    private val loggingInterceptor = HttpLoggingInterceptor().apply {
-        level = HttpLoggingInterceptor.Level.BODY
-    }
+    @Volatile
+    private var _usuarioApi: UsuarioApi? = null
 
-    private fun buildOkHttpClient(): OkHttpClient =
-        OkHttpClient.Builder()
-            .addInterceptor(loggingInterceptor)
-            .connectTimeout(10, TimeUnit.SECONDS)
-            .readTimeout(15, TimeUnit.SECONDS)
-            .writeTimeout(15, TimeUnit.SECONDS)
-            .build()
+    @Volatile
+    private var _donacionesApi: DonacionesApi? = null
 
-    private fun buildRetrofit(port: Int): Retrofit =
-        Retrofit.Builder()
-            .baseUrl("http://$HOST:$port/")
-            .client(buildOkHttpClient())
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
+    @Volatile
+    private var _contactoApi: ContactoApi? = null
 
-    val usuarioApi: UsuarioApi by lazy {
-        buildRetrofit(8081).create(UsuarioApi::class.java)
-    }
+    val usuarioApi: UsuarioApi
+        get() = _usuarioApi ?: synchronized(this) {
+            _usuarioApi ?: RetrofitConfig.crearRetrofit(RetrofitConfig.PUERTO_USUARIO, okHttpClient)
+                .create(UsuarioApi::class.java).also { _usuarioApi = it }
+        }
 
-    val donacionesApi: DonacionesApi by lazy {
-        buildRetrofit(8082).create(DonacionesApi::class.java)
-    }
+    val donacionesApi: DonacionesApi
+        get() = _donacionesApi ?: synchronized(this) {
+            _donacionesApi ?: RetrofitConfig.crearRetrofit(RetrofitConfig.PUERTO_DONACIONES, okHttpClient)
+                .create(DonacionesApi::class.java).also { _donacionesApi = it }
+        }
 
-    val contactoApi: ContactoApi by lazy {
-        buildRetrofit(8083).create(ContactoApi::class.java)
+    val contactoApi: ContactoApi
+        get() = _contactoApi ?: synchronized(this) {
+            _contactoApi ?: RetrofitConfig.crearRetrofit(RetrofitConfig.PUERTO_CONTACTO, okHttpClient)
+                .create(ContactoApi::class.java).also { _contactoApi = it }
+        }
+
+    /**
+     * Reinicia las instancias de las APIs cuando cambia la configuración del host o timeouts.
+     */
+    fun reiniciarClientes() {
+        synchronized(this) {
+            okHttpClient = RetrofitConfig.crearOkHttpClient()
+            _usuarioApi = null
+            _donacionesApi = null
+            _contactoApi = null
+        }
     }
 }

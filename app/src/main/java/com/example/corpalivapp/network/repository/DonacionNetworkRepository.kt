@@ -7,11 +7,11 @@ import com.example.corpalivapp.network.dto.EstadoRequest
 
 /**
  * Repositorio de red para Donaciones.
- * Usa el microservicio Donaciones-service (puerto 8082).
+ * Conecta con el microservicio Donaciones-service (puerto 8082) a través de Retrofit.
  */
 class DonacionNetworkRepository {
 
-    private val api = RetrofitClient.donacionesApi
+    private val api get() = RetrofitClient.donacionesApi
 
     suspend fun registrar(
         usuarioId: Long,
@@ -40,9 +40,13 @@ class DonacionNetworkRepository {
         )
         val response = api.registrar(body)
         if (response.isSuccessful && response.body() != null) {
-            response.body()!!
+            val resBody = response.body()!!
+            if (resBody.status.equals("error", ignoreCase = true)) {
+                throw Exception(resBody.message ?: "Error al registrar donación")
+            }
+            resBody
         } else {
-            throw Exception(response.errorBody()?.string() ?: "Error al registrar donación")
+            throw Exception(response.errorBody()?.string() ?: "Error al registrar donación (${response.code()})")
         }
     }
 
@@ -69,9 +73,13 @@ class DonacionNetworkRepository {
         runCatching {
             val response = api.cambiarEstado(id, EstadoRequest(estado = nuevoEstado))
             if (response.isSuccessful && response.body() != null) {
-                response.body()!!
+                val resBody = response.body()!!
+                if (resBody.status.equals("error", ignoreCase = true)) {
+                    throw Exception(resBody.message ?: "Error al cambiar estado")
+                }
+                resBody
             } else {
-                throw Exception(response.errorBody()?.string() ?: "Error al cambiar estado")
+                throw Exception(response.errorBody()?.string() ?: "Error al cambiar estado (${response.code()})")
             }
         }
 }

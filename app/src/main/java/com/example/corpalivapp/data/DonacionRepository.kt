@@ -4,6 +4,7 @@ import android.content.Context
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.flow.Flow
+
 class DonacionRepository(context: Context) {
 
     private val database = DatabaseProvider.obtenerDatabase(
@@ -22,7 +23,17 @@ class DonacionRepository(context: Context) {
             database.donacionDao().registrar(donacion)
         }
 
-    fun observarPorUsuario(usuarioId: Int): Flow<List<Donacion>>{
+    suspend fun registrarOActualizar(donacion: Donacion): Long =
+        withContext(Dispatchers.IO) {
+            database.donacionDao().registrar(donacion)
+        }
+
+    suspend fun obtenerPorId(id: Int): Donacion? =
+        withContext(Dispatchers.IO) {
+            database.donacionDao().buscarPorId(id)
+        }
+
+    fun observarPorUsuario(usuarioId: Int): Flow<List<Donacion>> {
         return database.donacionDao().observarPorUsuario(usuarioId)
     }
 

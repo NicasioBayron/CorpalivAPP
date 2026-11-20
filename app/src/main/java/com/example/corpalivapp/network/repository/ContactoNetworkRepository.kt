@@ -7,11 +7,11 @@ import com.example.corpalivapp.network.dto.ContactoItemResponse
 
 /**
  * Repositorio de red para Contacto.
- * Usa el microservicio Contacto-service (puerto 8083).
+ * Conecta con el microservicio Contacto-service (puerto 8083) a través de Retrofit.
  */
 class ContactoNetworkRepository {
 
-    private val api = RetrofitClient.contactoApi
+    private val api get() = RetrofitClient.contactoApi
 
     suspend fun enviar(
         usuarioId: Long?,
@@ -30,9 +30,13 @@ class ContactoNetworkRepository {
         )
         val response = api.enviar(body)
         if (response.isSuccessful && response.body() != null) {
-            response.body()!!
+            val resBody = response.body()!!
+            if (resBody.status.equals("error", ignoreCase = true)) {
+                throw Exception(resBody.message ?: "Error al enviar contacto")
+            }
+            resBody
         } else {
-            throw Exception(response.errorBody()?.string() ?: "Error al enviar contacto")
+            throw Exception(response.errorBody()?.string() ?: "Error al enviar contacto (${response.code()})")
         }
     }
 

@@ -24,7 +24,8 @@ import com.example.corpalivapp.ui.theme.TextoSecundarioSobreVerde
 fun HomeScreen(
     modifier: Modifier = Modifier,
     onMenuClick: () -> Unit = {},
-    onColaborarClick: () -> Unit = {}
+    onColaborarClick: () -> Unit = {},
+    onPublicacionesClick: () -> Unit = {}
 ) {
     val verdeCorpaliv = VerdeCorpaliv
     val fondo = MaterialTheme.colorScheme.background
@@ -150,6 +151,14 @@ fun HomeScreen(
                 shape = RoundedCornerShape(12.dp)
             ) {
                 Text(text = "Quiero Colaborar")
+            }
+
+            OutlinedButton(
+                onClick = onPublicacionesClick,
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp)
+            ) {
+                Text(text = "Ver Publicaciones (Retrofit API)")
             }
         }
     }

@@ -2,13 +2,14 @@ package com.example.corpalivapp.data
 
 import androidx.room.Dao
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 
 @Dao
 interface SolicitudContactoDao {
 
-    @Insert
-    suspend fun guardarSolicitud(solicitud: SolicitudContacto)
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun guardarSolicitud(solicitud: SolicitudContacto): Long
 
     @Query(
         "SELECT * FROM solicitudes_contacto ORDER BY fechaRegistro DESC"
@@ -26,4 +27,3 @@ interface SolicitudContactoDao {
         usuarioId: Int
     ): List<SolicitudContacto>
 }
-

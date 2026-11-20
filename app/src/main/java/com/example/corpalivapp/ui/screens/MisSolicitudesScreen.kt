@@ -17,6 +17,7 @@ import androidx.compose.ui.unit.sp
 
 import com.example.corpalivapp.data.DatabaseProvider
 import com.example.corpalivapp.data.SolicitudContacto
+import com.example.corpalivapp.network.repository.ContactoNetworkRepository
 import com.example.corpalivapp.ui.theme.VerdeCorpaliv
 
 import kotlinx.coroutines.Dispatchers
@@ -36,15 +37,10 @@ fun MisSolicitudesScreen(
 
     // COLORES SEGÚN EL MODO
     val fondo = MaterialTheme.colorScheme.background
-
     val colorTexto = MaterialTheme.colorScheme.onBackground
-
     val colorTitulo = MaterialTheme.colorScheme.primary
-
     val fondoTarjeta = MaterialTheme.colorScheme.surfaceVariant
-
     val colorSecundario = MaterialTheme.colorScheme.onSurfaceVariant
-
     val colorDivisor = MaterialTheme.colorScheme.outlineVariant
 
     val context = LocalContext.current
@@ -61,12 +57,43 @@ fun MisSolicitudesScreen(
         mutableStateOf(false)
     }
 
-    // Consultar solicitudes usuario room
+    // Consultar solicitudes usuario Room y sincronizar con Retrofit
     LaunchedEffect(usuarioId) {
         cargando = true
         error = false
 
         try {
+            // Intentar sincronizar desde el microservicio de Contacto mediante Retrofit
+            runCatching {
+                val netRepo = ContactoNetworkRepository()
+                val netResult = withContext(Dispatchers.IO) {
+                    netRepo.listarPorUsuario(usuarioId.toLong())
+                }
+                if (netResult.isSuccess) {
+                    val remotas = netResult.getOrNull().orEmpty()
+                    withContext(Dispatchers.IO) {
+                        val dao = DatabaseProvider.obtenerDatabase(context).solicitudContactoDao()
+                        val locales = dao.obtenerSolicitudesPorUsuario(usuarioId)
+                        for (item in remotas) {
+                            val yaExiste = locales.any { it.mensaje == item.mensaje && it.tipoColaboracion == item.tipoColaboracion }
+                            if (!yaExiste) {
+                                dao.guardarSolicitud(
+                                    SolicitudContacto(
+                                        id = item.id?.toInt() ?: 0,
+                                        nombre = item.nombre ?: "",
+                                        correo = item.correo ?: "",
+                                        tipoColaboracion = item.tipoColaboracion ?: "General",
+                                        mensaje = item.mensaje ?: "",
+                                        fechaRegistro = item.fechaRegistro ?: System.currentTimeMillis(),
+                                        usuarioId = usuarioId
+                                    )
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
             solicitudes = withContext(Dispatchers.IO) {
                 DatabaseProvider
                     .obtenerDatabase(context)

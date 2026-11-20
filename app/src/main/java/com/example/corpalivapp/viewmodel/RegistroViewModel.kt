@@ -34,6 +34,7 @@ class RegistroViewModel(
 ) : AndroidViewModel(application) {
     private val repositorio = FormulariosRepository(application)
     private val networkRepo = UsuarioNetworkRepository()
+
     // La contraseña vive solo en memoria: no se serializa en SavedStateHandle.
     private val _uiState = MutableStateFlow(RegistroUiState(
         nombre = savedState["nombre"] ?: "",
@@ -71,8 +72,15 @@ class RegistroViewModel(
         val errorNombre = RegistroValidator.validarNombre(datos.nombre)
         val errorCorreo = RegistroValidator.validarCorreo(datos.correo)
         val errorClave = RegistroValidator.validarClave(datos.clave)
-        _uiState.update { it.copy(errorNombre = errorNombre, errorCorreo = errorCorreo,
-            errorClave = errorClave, mensaje = null, esError = false) }
+        _uiState.update {
+            it.copy(
+                errorNombre = errorNombre,
+                errorCorreo = errorCorreo,
+                errorClave = errorClave,
+                mensaje = null,
+                esError = false
+            )
+        }
         if (listOf(errorNombre, errorCorreo, errorClave).any { it != null }) return
 
         _uiState.update { it.copy(registrando = true) }
@@ -81,35 +89,71 @@ class RegistroViewModel(
                 val correoFinal = datos.correo.trim().lowercase(Locale.ROOT)
                 val nombreFinal = datos.nombre.trim()
 
-                // 1. Intentar registrar en el backend (network-first)
+                // 1. Intentar registrar en el backend mediante Retrofit (network-first)
                 val networkResult = networkRepo.register(nombreFinal, correoFinal, datos.clave)
                 if (networkResult.isSuccess) {
-                    // Si el backend aceptó, igual guardamos localmente para acceso offline
+                    val resp = networkResult.getOrNull()!!
+                    // Guardamos también localmente para disponibilidad offline
                     runCatching {
                         repositorio.registrar(nombreFinal, correoFinal, datos.clave)
                     }
                     savedState["nombre"] = ""
                     savedState["correo"] = ""
-                    _uiState.value = RegistroUiState(registrando = true,
-                        mensaje = "¡Cuenta registrada correctamente! Ya puedes iniciar sesión.")
+                    _uiState.value = RegistroUiState(
+                        registrando = false,
+                        nombre = "",
+                        correo = "",
+                        clave = "",
+                        mensaje = resp.message.ifBlank { "¡Cuenta registrada correctamente! Ya puedes iniciar sesión." },
+                        esError = false
+                    )
                     return@launch
+                } else {
+                    val errorMsg = networkResult.exceptionOrNull()?.message.orEmpty()
+                    // Si el servidor rechazó porque el correo ya existe
+                    if (errorMsg.contains("ya existe", ignoreCase = true)) {
+                        _uiState.update {
+                            it.copy(
+                                errorCorreo = "Este correo ya está registrado.",
+                                mensaje = null,
+                                esError = true
+                            )
+                        }
+                        return@launch
+                    }
+                    // Si el fallo fue de conexión (servidor inaccesible), procedemos al fallback local
                 }
 
-                // 2. Fallback: solo Room si no hay conexión al backend
+                // 2. Fallback: registrar en Room si el backend no estuvo disponible
                 repositorio.registrar(nombreFinal, correoFinal, datos.clave)
                 savedState["nombre"] = ""
                 savedState["correo"] = ""
-                _uiState.value = RegistroUiState(registrando = true,
-                    mensaje = "¡Cuenta registrada correctamente! Ya puedes iniciar sesión.")
+                _uiState.value = RegistroUiState(
+                    registrando = false,
+                    nombre = "",
+                    correo = "",
+                    clave = "",
+                    mensaje = "¡Cuenta registrada correctamente! Ya puedes iniciar sesión.",
+                    esError = false
+                )
             } catch (error: CancellationException) {
                 throw error
             } catch (error: Exception) {
                 if (error is CorreoRegistradoException || error is SQLiteConstraintException) {
-                    _uiState.update { it.copy(errorCorreo = "Este correo ya está registrado.",
-                        mensaje = null, esError = true) }
+                    _uiState.update {
+                        it.copy(
+                            errorCorreo = "Este correo ya está registrado.",
+                            mensaje = null,
+                            esError = true
+                        )
+                    }
                 } else {
-                    _uiState.update { it.copy(mensaje = "No se pudo registrar la cuenta. Intenta nuevamente.",
-                        esError = true) }
+                    _uiState.update {
+                        it.copy(
+                            mensaje = "No se pudo registrar la cuenta. Intenta nuevamente.",
+                            esError = true
+                        )
+                    }
                 }
             } finally {
                 _uiState.update { it.copy(registrando = false) }

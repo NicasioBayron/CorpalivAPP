@@ -3,14 +3,19 @@ package com.example.corpalivapp.viewmodel
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.corpalivapp.data.DatabaseProvider
 import com.example.corpalivapp.data.Donacion
 import com.example.corpalivapp.data.DonacionRepository
+import com.example.corpalivapp.data.PasswordUtils
+import com.example.corpalivapp.data.Usuario
 import com.example.corpalivapp.network.repository.DonacionNetworkRepository
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 data class AdminUiState(
     val cargando: Boolean = true,
@@ -52,6 +57,51 @@ class AdminViewModel(application: Application) : AndroidViewModel(application) {
     fun observarDonaciones() {
         viewModelScope.launch {
             _uiState.update { it.copy(cargando = true, error = null) }
+
+            // Intentar sincronizar todas las donaciones desde Retrofit
+            runCatching {
+                val remota = withContext(Dispatchers.IO) { networkRepo.listarTodas() }
+                if (remota.isSuccess) {
+                    val listaRemota = remota.getOrNull().orEmpty()
+                    withContext(Dispatchers.IO) {
+                        val daoUsuario = DatabaseProvider.obtenerDatabase(getApplication()).usuarioDao()
+                        for (d in listaRemota) {
+                            val idRemoto = d.id?.toInt() ?: continue
+                            val uId = d.usuarioId?.toInt() ?: 1
+                            if (daoUsuario.buscarPorId(uId) == null) {
+                                val salt = PasswordUtils.generarSalt()
+                                daoUsuario.registrarUsuario(
+                                    Usuario(
+                                        id = uId,
+                                        nombre = d.nombreDonante ?: "Donante",
+                                        correo = d.correoDonante ?: "donante@corpaliv.cl",
+                                        claveHash = PasswordUtils.generarHash("Temporal123!", salt),
+                                        claveSalt = salt
+                                    )
+                                )
+                            }
+                            repositorio.registrarOActualizar(
+                                Donacion(
+                                    id = idRemoto,
+                                    usuarioId = uId,
+                                    nombre = d.nombreDonante ?: "Donante",
+                                    correo = d.correoDonante ?: "donante@corpaliv.cl",
+                                    monto = d.monto ?: 0,
+                                    fechaAporte = d.fechaAporte ?: "",
+                                    aceptaCondiciones = true,
+                                    recibirSeguimiento = false,
+                                    fotoComprobante = d.fotoComprobante,
+                                    fechaRegistro = d.fechaRegistro ?: System.currentTimeMillis(),
+                                    region = d.region,
+                                    comuna = d.comuna,
+                                    estado = d.estado ?: "PENDIENTE"
+                                )
+                            )
+                        }
+                    }
+                }
+            }
+
             repositorio.observarTodas()
                 .catch { ex ->
                     _uiState.update {
@@ -85,16 +135,22 @@ class AdminViewModel(application: Application) : AndroidViewModel(application) {
     fun cambiarEstado(id: Int, nuevoEstado: String) {
         viewModelScope.launch {
             try {
-                // 1. Actualizar en Room
+                // 1. Actualizar en Room local
                 repositorio.actualizarEstado(id, nuevoEstado)
 
-                // 2. Intentar actualizar en el microservicio
-                runCatching {
+                // 2. Intentar actualizar en el microservicio vía Retrofit
+                val res = withContext(Dispatchers.IO) {
                     networkRepo.cambiarEstado(id.toLong(), nuevoEstado)
                 }
 
+                val msg = if (res.isSuccess) {
+                    "Donación #$id actualizada a $nuevoEstado (servidor y local)"
+                } else {
+                    "Donación #$id actualizada localmente a $nuevoEstado"
+                }
+
                 _uiState.update {
-                    it.copy(mensaje = "Donación #$id actualizada a $nuevoEstado")
+                    it.copy(mensaje = msg)
                 }
             } catch (e: Exception) {
                 _uiState.update {

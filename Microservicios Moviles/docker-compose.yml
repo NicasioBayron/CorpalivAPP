@@ -1,0 +1,79 @@
+x-common-env: &common-env
+  DB_HOST: mysql
+  DB_PORT: "3306"
+  DB_USERNAME: corpaliv_app
+  DB_PASSWORD: microservicios_dev
+  SECRET: "esta_es_mi_compleja_clave_secreta"
+
+services:
+  mysql:
+    image: mysql:8.4
+    environment:
+      MYSQL_ROOT_PASSWORD: root_dev_password
+      MYSQL_DATABASE: corpaliv_usuarios_db
+      MYSQL_USER: corpaliv_app
+      MYSQL_PASSWORD: microservicios_dev
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./docker/mysql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -u root -proot_dev_password --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  usuario-service:
+    build: ./Usuario-service
+    ports:
+      - "8081:8081"
+    environment:
+      <<: *common-env
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/corpaliv_usuarios_db?serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: corpaliv_app
+      SPRING_DATASOURCE_PASSWORD: microservicios_dev
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  donaciones-service:
+    build: ./Donaciones-service
+    ports:
+      - "8082:8082"
+    environment:
+      <<: *common-env
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/corpaliv_donaciones_db?serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: corpaliv_app
+      SPRING_DATASOURCE_PASSWORD: microservicios_dev
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  contacto-service:
+    build: ./Contacto-service
+    ports:
+      - "8083:8083"
+    environment:
+      <<: *common-env
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/corpaliv_contacto_db?serverTimezone=UTC
+      SPRING_DATASOURCE_USERNAME: corpaliv_app
+      SPRING_DATASOURCE_PASSWORD: microservicios_dev
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  api-gateway:
+    build: ./ApiGateway
+    ports:
+      - "9090:9090"
+    environment:
+      <<: *common-env
+    depends_on:
+      - usuario-service
+      - donaciones-service
+      - contacto-service
+
+volumes:
+  mysql_data:

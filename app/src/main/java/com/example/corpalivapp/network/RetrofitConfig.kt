@@ -32,10 +32,21 @@ object RetrofitConfig {
     var host: String = DEFAULT_HOST
         private set
 
-    // Puertos de los microservicios backend
+    // Puerto del API Gateway centralizado
+    const val PUERTO_API_GATEWAY = 9090
+
+    // Puertos individuales de los microservicios backend (modo directo / fallback)
     const val PUERTO_USUARIO = 8081
     const val PUERTO_DONACIONES = 8082
     const val PUERTO_CONTACTO = 8083
+
+    /**
+     * Si está activo (true), todo el tráfico pasa a través del API Gateway (puerto 9090).
+     * Si está desactivado (false), se conecta directamente a cada microservicio en su puerto respectivo.
+     */
+    @Volatile
+    var usarApiGateway: Boolean = true
+        private set
 
     // Tiempos de espera (timeouts) en segundos
     const val TIMEOUT_CONNECT = 10L
@@ -57,10 +68,25 @@ object RetrofitConfig {
     }
 
     /**
+     * Permite alternar entre usar el API Gateway (puerto 9090) o conectar directo a cada microservicio.
+     */
+    fun configurarModoApiGateway(activo: Boolean) {
+        usarApiGateway = activo
+        RetrofitClient.reiniciarClientes()
+    }
+
+    /**
      * Genera la URL base completa para un puerto dado.
      */
     fun getBaseUrl(puerto: Int): String {
         return "http://$host:$puerto/"
+    }
+
+    /**
+     * Genera la URL base para el API Gateway.
+     */
+    fun getApiGatewayBaseUrl(): String {
+        return "http://$host:$PUERTO_API_GATEWAY/"
     }
 
     /**

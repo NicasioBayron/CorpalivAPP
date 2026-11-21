@@ -24,7 +24,6 @@ import com.example.corpalivapp.viewmodel.LoginViewModel
 import com.example.corpalivapp.ui.screens.DonacionScreen
 import com.example.corpalivapp.ui.screens.HistorialAportesScreen
 import com.example.corpalivapp.ui.screens.AdminScreen
-import com.example.corpalivapp.ui.screens.PostScreen
 @Composable
 fun App() {
     val loginViewModel: LoginViewModel = viewModel()
@@ -48,7 +47,17 @@ fun App() {
     CorpalivAppTheme(darkTheme = modoOscuro) {
         OpcionesDeslizante(
             pantallaActual = pantallaActual,
-            onPantallaSeleccionada = { pantallaActual = it },
+            onPantallaSeleccionada = { pantallaSeleccionada ->
+                // "Mi cuenta" usa internamente la opción "Iniciar sesión";
+                // si ya hay una sesión activa, debe abrir el perfil normal.
+                pantallaActual = if (
+                    pantallaSeleccionada == "Iniciar sesión" && usuarioId != null
+                ) {
+                    "Usuario"
+                } else {
+                    pantallaSeleccionada
+                }
+            },
             esAdmin = esAdmin
         ) { abrirMenu ->
 
@@ -62,14 +71,6 @@ fun App() {
                         onColaborarClick = {
                             pantallaActual = "Aportes"
                         },
-                        onPublicacionesClick = {
-                            pantallaActual = "Publicaciones"
-                        }
-                    )
-
-                    "Publicaciones" -> PostScreen(
-                        viewModel = viewModel(),
-                        onMenuClick = abrirMenu
                     )
 
                     "Usuario" -> {

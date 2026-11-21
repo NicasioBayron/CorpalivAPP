@@ -42,7 +42,6 @@ fun OpcionesDeslizante(
 
     val opcionesBase = listOf(
         "Inicio",
-        "Publicaciones",
         "Sobre nosotros",
         "Aportes",
         "Contactanos",
@@ -57,7 +56,6 @@ fun OpcionesDeslizante(
     }
     val etiquetas = mapOf(
         "Panel admin" to "Panel de administración",
-        "Publicaciones" to "Publicaciones (Retrofit)",
         "Iniciar sesión" to "Mi cuenta",
         "Aportes" to "Cómo colaborar",
         "Contactanos" to "Contacto",

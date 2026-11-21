@@ -15,15 +15,14 @@ import java.util.concurrent.TimeUnit
  * - Contacto-service → Puerto 8083
  *
  * Configuración de Host:
- * - Emulador Android Studio: "10.0.2.2" (mapea al localhost de la máquina host).
- * - Dispositivo físico: IP local de la computadora en la red Wi-Fi (ej: "192.168.1.100").
+ * - Host del backend en la red local: "192.168.1.87".
  */
 object RetrofitConfig {
 
     /**
-     * Host por defecto para el emulador de Android.
+     * Host por defecto del backend en la red local.
      */
-    const val DEFAULT_HOST = "10.0.2.2"
+    const val DEFAULT_HOST = "192.168.1.87"
 
     /**
      * Host actual utilizado para construir las URLs base de Retrofit.
@@ -67,13 +66,7 @@ object RetrofitConfig {
         }
     }
 
-    /**
-     * Permite alternar entre usar el API Gateway (puerto 9090) o conectar directo a cada microservicio.
-     */
-    fun configurarModoApiGateway(activo: Boolean) {
-        usarApiGateway = activo
-        RetrofitClient.reiniciarClientes()
-    }
+
 
     /**
      * Genera la URL base completa para un puerto dado.
@@ -82,12 +75,7 @@ object RetrofitConfig {
         return "http://$host:$puerto/"
     }
 
-    /**
-     * Genera la URL base para el API Gateway.
-     */
-    fun getApiGatewayBaseUrl(): String {
-        return "http://$host:$PUERTO_API_GATEWAY/"
-    }
+
 
     /**
      * Crea y configura la instancia de [OkHttpClient] con interceptores de logging y timeouts.

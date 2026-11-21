@@ -10,6 +10,9 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -19,6 +22,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.corpalivapp.data.Donacion
+import com.example.corpalivapp.network.RetrofitConfig
 import com.example.corpalivapp.ui.theme.VerdeCorpaliv
 import com.example.corpalivapp.viewmodel.AdminViewModel
 import java.text.NumberFormat
@@ -38,6 +42,8 @@ fun AdminScreen(
     val colorTexto = MaterialTheme.colorScheme.onBackground
 
     val formatoMonto = NumberFormat.getIntegerInstance(Locale.forLanguageTag("es-CL"))
+    var hostServidor by rememberSaveable { mutableStateOf(RetrofitConfig.host) }
+    var mensajeHost by rememberSaveable { mutableStateOf("") }
 
     Column(
         modifier = modifier
@@ -95,6 +101,83 @@ fun AdminScreen(
                         style = MaterialTheme.typography.bodyMedium,
                         color = colorTexto
                     )
+                }
+            }
+
+            item {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Column(
+                        modifier = Modifier.padding(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(10.dp)
+                    ) {
+                        Text(
+                            text = "Servidor y Retrofit",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold,
+                            color = colorTitulo
+                        )
+                        Text(
+                            text = "Configuración exclusiva del administrador para conectar con el backend.",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = colorTexto
+                        )
+                        OutlinedTextField(
+                            value = hostServidor,
+                            onValueChange = {
+                                hostServidor = it
+                                mensajeHost = ""
+                            },
+                            label = { Text("Dirección IP o Host") },
+                            singleLine = true,
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            OutlinedButton(
+                                onClick = {
+                                    hostServidor = RetrofitConfig.DEFAULT_HOST
+                                    RetrofitConfig.configurarHost(RetrofitConfig.DEFAULT_HOST)
+                                    mensajeHost = "Restablecido a ${RetrofitConfig.DEFAULT_HOST}"
+                                },
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Text("Predeterminado", fontSize = 12.sp)
+                            }
+                            Button(
+                                onClick = {
+                                    RetrofitConfig.configurarHost(hostServidor)
+                                    hostServidor = RetrofitConfig.host
+                                    mensajeHost = "Host actualizado a '${RetrofitConfig.host}'"
+                                },
+                                colors = ButtonDefaults.buttonColors(containerColor = verde),
+                                modifier = Modifier.weight(1f)
+                            ) {
+                                Text("Guardar", fontSize = 12.sp)
+                            }
+                        }
+                        if (mensajeHost.isNotBlank()) {
+                            Text(
+                                text = mensajeHost,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = verde,
+                                fontWeight = FontWeight.SemiBold
+                            )
+                        }
+                        HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
+                        Text(
+                            text = "Usuario: ${RetrofitConfig.getBaseUrl(RetrofitConfig.PUERTO_USUARIO)}\n" +
+                                "Donaciones: ${RetrofitConfig.getBaseUrl(RetrofitConfig.PUERTO_DONACIONES)}\n" +
+                                "Contacto: ${RetrofitConfig.getBaseUrl(RetrofitConfig.PUERTO_CONTACTO)}",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
             }
 

@@ -22,7 +22,7 @@ object RetrofitConfig {
     /**
      * Host por defecto del backend en la red local.
      */
-    const val DEFAULT_HOST = "192.168.1.87"
+    const val DEFAULT_HOST = "172.20.10.2"
 
     /**
      * Host actual utilizado para construir las URLs base de Retrofit.

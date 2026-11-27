@@ -14,15 +14,18 @@ import java.util.concurrent.TimeUnit
  * - Donaciones-service → Puerto 8082
  * - Contacto-service   → Puerto 8083
  *
- * Hosts soportados:
- * - Emulador Android: "10.0.2.2" (apunta al localhost de la PC).
- * - Dispositivo físico: IP local de la PC en Wi-Fi (ej: "192.168.100.164").
+
+=======
+ * Configuración de Host:
+ * - Host del backend en la red local: "192.168.1.87".
  */
 object RetrofitConfig {
 
-    const val HOST_EMULADOR = "10.0.2.2"
-    const val HOST_PC_WIFI = "192.168.100.164"
-    const val DEFAULT_HOST = HOST_EMULADOR
+    /**
+     * Host por defecto del backend en la red local.
+     */
+    const val DEFAULT_HOST = "192.168.1.87"
+>>>>>>> 05a235dc08a5a965af5a627046ed9ba86a1ba459
 
     @Volatile
     var host: String = DEFAULT_HOST
@@ -49,11 +52,28 @@ object RetrofitConfig {
         }
     }
 
+<<<<<<< HEAD
+=======
+
+
+    /**
+     * Genera la URL base completa para un puerto dado.
+     */
+>>>>>>> 05a235dc08a5a965af5a627046ed9ba86a1ba459
     fun getBaseUrl(puerto: Int): String {
         return "http://$host:$puerto/"
     }
 
+<<<<<<< HEAD
     fun crearOkHttpClient(connectTimeoutSec: Long = TIMEOUT_CONNECT): OkHttpClient {
+=======
+
+
+    /**
+     * Crea y configura la instancia de [OkHttpClient] con interceptores de logging y timeouts.
+     */
+    fun crearOkHttpClient(): OkHttpClient {
+>>>>>>> 05a235dc08a5a965af5a627046ed9ba86a1ba459
         val loggingInterceptor = HttpLoggingInterceptor().apply {
             level = HttpLoggingInterceptor.Level.BODY
         }

@@ -11,7 +11,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -20,7 +19,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
-import com.example.corpalivapp.network.RetrofitConfig
 import com.example.corpalivapp.notifications.Notificaciones
 import com.example.corpalivapp.ui.theme.TextoSobreVerde
 import com.example.corpalivapp.ui.theme.VerdeCorpaliv
@@ -41,10 +39,6 @@ fun AjustesScreen(
 
     val context = LocalContext.current
     var mensajeNotificacion by remember { mutableStateOf("") }
-
-    // Estado para la configuración de Retrofit
-    var hostServidor by rememberSaveable { mutableStateOf(RetrofitConfig.host) }
-    var mensajeHost by remember { mutableStateOf("") }
 
     val enviarPrueba: () -> Unit = {
         val enviada = Notificaciones.enviarPrueba(context)
@@ -149,101 +143,6 @@ fun AjustesScreen(
                     Switch(
                         checked = modoOscuro,
                         onCheckedChange = onModoOscuroChange
-                    )
-                }
-            }
-
-            // CONFIGURACIÓN DE RED Y RETROFIT
-            Text(
-                text = "Servidor y Retrofit",
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold,
-                color = colorTexto
-            )
-
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                colors = CardDefaults.cardColors(
-                    containerColor = colorTarjeta
-                ),
-                shape = RoundedCornerShape(16.dp)
-            ) {
-                Column(
-                    modifier = Modifier.padding(16.dp),
-                    verticalArrangement = Arrangement.spacedBy(10.dp)
-                ) {
-                    Text(
-                        text = "Host del Backend (Retrofit)",
-                        fontWeight = FontWeight.Bold,
-                        color = colorTexto
-                    )
-                    Text(
-                        text = "Usa '10.0.2.2' para el emulador o la IP local de tu PC (ej: '192.168.1.100') para celular físico.",
-                        fontSize = 12.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-
-                    OutlinedTextField(
-                        value = hostServidor,
-                        onValueChange = {
-                            hostServidor = it
-                            mensajeHost = ""
-                        },
-                        label = { Text("Dirección IP o Host") },
-                        singleLine = true,
-                        modifier = Modifier.fillMaxWidth()
-                    )
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        OutlinedButton(
-                            onClick = {
-                                hostServidor = "10.0.2.2"
-                                RetrofitConfig.configurarHost("10.0.2.2")
-                                mensajeHost = "Restablecido a 10.0.2.2 (Emulador)"
-                            },
-                            modifier = Modifier.weight(1f)
-                        ) {
-                            Text("Emulador", fontSize = 12.sp)
-                        }
-
-                        Button(
-                            onClick = {
-                                RetrofitConfig.configurarHost(hostServidor)
-                                mensajeHost = "Host actualizado a '${RetrofitConfig.host}'"
-                            },
-                            colors = ButtonDefaults.buttonColors(containerColor = verde),
-                            modifier = Modifier.weight(1f)
-                        ) {
-                            Text("Guardar", fontSize = 12.sp)
-                        }
-                    }
-
-                    if (mensajeHost.isNotBlank()) {
-                        Text(
-                            text = mensajeHost,
-                            fontSize = 12.sp,
-                            color = verde,
-                            fontWeight = FontWeight.SemiBold
-                        )
-                    }
-
-                    HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
-
-                    Text(
-                        text = "Microservicios configurados:",
-                        fontSize = 11.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Text(
-                        text = "• Usuario: ${RetrofitConfig.getBaseUrl(RetrofitConfig.PUERTO_USUARIO)}\n" +
-                               "• Donaciones: ${RetrofitConfig.getBaseUrl(RetrofitConfig.PUERTO_DONACIONES)}\n" +
-                               "• Contacto: ${RetrofitConfig.getBaseUrl(RetrofitConfig.PUERTO_CONTACTO)}",
-                        fontSize = 11.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }

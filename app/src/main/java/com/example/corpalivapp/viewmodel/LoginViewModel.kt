@@ -180,6 +180,22 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
                         }
                         return@launch
                     }
+
+                    // No presentar un error de red como si fuera un problema de credenciales.
+                    // En un teléfono físico, 10.0.2.2 no apunta al computador: se debe usar
+                    // la IP Wi-Fi del equipo que ejecuta los microservicios.
+                    if (esErrorDeConexion(errorNet)) {
+                        _uiState.update {
+                            it.copy(
+                                cargando = false,
+                                clave = "",
+                                usuarioId = null,
+                                autenticado = false,
+                                mensaje = "No se pudo conectar al backend. En un teléfono usa la IP Wi-Fi del PC; 10.0.2.2 es solo para el emulador."
+                            )
+                        }
+                        return@launch
+                    }
                 }
 
                 // 2. Fallback a Room si el backend no estuvo disponible (ej: sin conexión)
@@ -235,5 +251,21 @@ class LoginViewModel(application: Application) : AndroidViewModel(application) {
     fun cerrarSesion() {
         jwtToken = null
         _uiState.value = LoginUiState()
+    }
+
+    private fun esErrorDeConexion(mensaje: String): Boolean {
+        val texto = mensaje.lowercase(Locale.ROOT)
+        return listOf(
+            "failed to connect",
+            "connection refused",
+            "connect timed out",
+            "timeout",
+            "unknownhost",
+            "unable to resolve host",
+            "network is unreachable",
+            "no route to host",
+            "cleartxt",
+            "cleartext"
+        ).any(texto::contains)
     }
 }
